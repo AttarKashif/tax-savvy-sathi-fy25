@@ -1,4 +1,3 @@
-
 // Tax calculation utilities for FY 2024-25 (AY 2025-26)
 
 export interface TaxSlabRate {
@@ -9,6 +8,7 @@ export interface TaxSlabRate {
 
 export interface IncomeData {
   salary: number;
+  basicSalary: number; // Added separate basic salary
   businessIncome: number;
   capitalGainsShort: number;
   capitalGainsLong: number;
@@ -22,7 +22,19 @@ export interface DeductionData {
   lta: number;
   homeLoanInterest: number;
   section80TTA: number;
-  nps?: number; // 80CCD(1B)
+  nps: number; // 80CCD(1B)
+  professionalTax: number; // Added professional tax
+  section80E: number; // Education loan interest
+  section80G: number; // Donations
+  section80EE: number; // Home loan interest for first time buyers
+  section80EEA: number; // Electric vehicle loan interest
+  section80U: number; // Disability deduction
+  section80DDB: number; // Medical treatment of specified diseases
+  section80CCG: number; // Rajiv Gandhi Equity Savings Scheme
+  section80CCC: number; // Pension fund contributions
+  section80CCD: number; // Employee contribution to pension scheme
+  gratuity: number; // Gratuity exemption
+  leaveEncashment: number; // Leave encashment exemption
 }
 
 export interface TaxResult {
@@ -106,7 +118,11 @@ export function calculateOldRegimeTax(
   
   const totalDeductions = standardDeduction + deductions.section80C + deductions.section80D + 
                          deductions.hra + deductions.lta + deductions.homeLoanInterest + 
-                         deductions.section80TTA + (deductions.nps || 0);
+                         deductions.section80TTA + deductions.nps + deductions.professionalTax +
+                         deductions.section80E + deductions.section80G + deductions.section80EE +
+                         deductions.section80EEA + deductions.section80U + deductions.section80DDB +
+                         deductions.section80CCG + deductions.section80CCC + deductions.section80CCD +
+                         deductions.gratuity + deductions.leaveEncashment;
   
   const taxableIncome = Math.max(0, grossIncome - totalDeductions);
   
@@ -145,8 +161,8 @@ export function calculateNewRegimeTax(income: IncomeData, deductions: DeductionD
   // Standard deduction for salary (₹75,000 in new regime as per Budget 2024)
   const standardDeduction = Math.min(income.salary, 75000);
   
-  // In new regime, only HRA and standard deduction are allowed
-  const totalDeductions = standardDeduction + deductions.hra;
+  // In new regime, only HRA, standard deduction, and a few specific exemptions are allowed
+  const totalDeductions = standardDeduction + deductions.hra + deductions.gratuity + deductions.leaveEncashment;
   const taxableIncome = Math.max(0, grossIncome - totalDeductions);
   
   const taxBeforeRebate = calculateTaxOnSlabs(taxableIncome, newRegimeSlabs);

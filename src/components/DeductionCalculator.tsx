@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -63,6 +63,18 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
   const [savingsInterest, setSavingsInterest] = useState(0);
   const [npsContribution, setNpsContribution] = useState(0);
   const [lta, setLta] = useState(0);
+  const [professionalTax, setProfessionalTax] = useState(0);
+  const [section80E, setSection80E] = useState(0);
+  const [section80G, setSection80G] = useState(0);
+  const [section80EE, setSection80EE] = useState(0);
+  const [section80EEA, setSection80EEA] = useState(0);
+  const [section80U, setSection80U] = useState(0);
+  const [section80DDB, setSection80DDB] = useState(0);
+  const [section80CCG, setSection80CCG] = useState(0);
+  const [section80CCC, setSection80CCC] = useState(0);
+  const [section80CCD, setSection80CCD] = useState(0);
+  const [gratuity, setGratuity] = useState(0);
+  const [leaveEncashment, setLeaveEncashment] = useState(0);
   const [userAge, setUserAge] = useState(30);
 
   // Update basic salary when it changes
@@ -70,40 +82,70 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
     setHraData(prev => ({ ...prev, basicSalary }));
   }, [basicSalary]);
 
-  // Calculate and update deductions whenever inputs change
-  useEffect(() => {
+  // Memoized calculations to prevent infinite re-renders
+  const calculations = useMemo(() => {
     const hraDeduction = calculateMaxHRA(hraData);
     const section80CResult = calculateSection80C(section80C);
     const section80DResult = calculateSection80D(section80D);
     const homeLoanDeduction = calculateHomeLoanInterest(homeLoanInterest);
     const savingsDeduction = calculateSection80TTA(savingsInterest, userAge);
     const npsDeduction = calculateNPSDeduction(npsContribution);
+    
+    return {
+      hraDeduction,
+      section80CResult,
+      section80DResult,
+      homeLoanDeduction,
+      savingsDeduction,
+      npsDeduction
+    };
+  }, [hraData, section80C, section80D, homeLoanInterest, savingsInterest, npsContribution, userAge]);
 
+  // Update deductions when calculations change
+  useEffect(() => {
     const newDeductions: DeductionData = {
-      section80C: section80CResult.total,
-      section80D: section80DResult.total,
-      hra: hraDeduction,
+      section80C: calculations.section80CResult.total,
+      section80D: calculations.section80DResult.total,
+      hra: calculations.hraDeduction,
       lta: lta,
-      homeLoanInterest: homeLoanDeduction,
-      section80TTA: savingsDeduction,
-      nps: npsDeduction
+      homeLoanInterest: calculations.homeLoanDeduction,
+      section80TTA: calculations.savingsDeduction,
+      nps: calculations.npsDeduction,
+      professionalTax,
+      section80E,
+      section80G,
+      section80EE,
+      section80EEA,
+      section80U,
+      section80DDB,
+      section80CCG,
+      section80CCC,
+      section80CCD,
+      gratuity,
+      leaveEncashment
     };
 
-    onDeductionsUpdate(newDeductions);
-  }, [hraData, section80C, section80D, homeLoanInterest, savingsInterest, npsContribution, lta, userAge, onDeductionsUpdate]);
+    // Only update if there's an actual change
+    const hasChanged = Object.keys(newDeductions).some(
+      key => newDeductions[key as keyof DeductionData] !== currentDeductions[key as keyof DeductionData]
+    );
+
+    if (hasChanged) {
+      onDeductionsUpdate(newDeductions);
+    }
+  }, [calculations, lta, professionalTax, section80E, section80G, section80EE, section80EEA, 
+      section80U, section80DDB, section80CCG, section80CCC, section80CCD, gratuity, 
+      leaveEncashment, currentDeductions, onDeductionsUpdate]);
 
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString('en-IN')}`;
 
-  const calculations = {
-    hraDeduction: calculateMaxHRA(hraData),
-    section80CResult: calculateSection80C(section80C),
-    section80DResult: calculateSection80D(section80D),
-    homeLoanDeduction: calculateHomeLoanInterest(homeLoanInterest),
-    savingsDeduction: calculateSection80TTA(savingsInterest, userAge),
-    npsDeduction: calculateNPSDeduction(npsContribution),
-    totalDeductions: currentDeductions.hra + currentDeductions.section80C + currentDeductions.section80D + 
-                    currentDeductions.homeLoanInterest + currentDeductions.section80TTA + (currentDeductions.nps || 0) + currentDeductions.lta
-  };
+  const totalDeductions = currentDeductions.hra + currentDeductions.section80C + currentDeductions.section80D + 
+                         currentDeductions.homeLoanInterest + currentDeductions.section80TTA + currentDeductions.nps +
+                         currentDeductions.professionalTax + currentDeductions.section80E + currentDeductions.section80G +
+                         currentDeductions.section80EE + currentDeductions.section80EEA + currentDeductions.section80U +
+                         currentDeductions.section80DDB + currentDeductions.section80CCG + currentDeductions.section80CCC +
+                         currentDeductions.section80CCD + currentDeductions.gratuity + currentDeductions.leaveEncashment +
+                         currentDeductions.lta;
 
   return (
     <div className="space-y-6">
@@ -116,11 +158,12 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
       </div>
 
       <Tabs defaultValue="hra" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6 text-xs">
           <TabsTrigger value="hra">HRA</TabsTrigger>
-          <TabsTrigger value="80c">Section 80C</TabsTrigger>
-          <TabsTrigger value="80d">Section 80D</TabsTrigger>
+          <TabsTrigger value="80c">80C</TabsTrigger>
+          <TabsTrigger value="80d">80D</TabsTrigger>
           <TabsTrigger value="others">Others</TabsTrigger>
+          <TabsTrigger value="additional">More</TabsTrigger>
           <TabsTrigger value="summary">Summary</TabsTrigger>
         </TabsList>
 
@@ -146,7 +189,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="basicSalary"
                     type="number"
-                    value={hraData.basicSalary || ''}
+                    value={hraData.basicSalary === 0 ? '' : hraData.basicSalary}
                     onChange={(e) => setHraData(prev => ({ ...prev, basicSalary: Number(e.target.value) || 0 }))}
                     placeholder="Enter basic salary"
                   />
@@ -156,7 +199,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="hraReceived"
                     type="number"
-                    value={hraData.hraReceived || ''}
+                    value={hraData.hraReceived === 0 ? '' : hraData.hraReceived}
                     onChange={(e) => setHraData(prev => ({ ...prev, hraReceived: Number(e.target.value) || 0 }))}
                     placeholder="Enter HRA received"
                   />
@@ -166,7 +209,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="rentPaid"
                     type="number"
-                    value={hraData.rentPaid || ''}
+                    value={hraData.rentPaid === 0 ? '' : hraData.rentPaid}
                     onChange={(e) => setHraData(prev => ({ ...prev, rentPaid: Number(e.target.value) || 0 }))}
                     placeholder="Enter rent paid"
                   />
@@ -208,7 +251,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     <Input
                       id={key}
                       type="number"
-                      value={value || ''}
+                      value={value === 0 ? '' : value}
                       onChange={(e) => setSection80C(prev => ({ ...prev, [key]: Number(e.target.value) || 0 }))}
                       placeholder={`Enter ${key} amount`}
                     />
@@ -245,7 +288,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="selfFamily"
                     type="number"
-                    value={section80D.selfAndFamily || ''}
+                    value={section80D.selfAndFamily === 0 ? '' : section80D.selfAndFamily}
                     onChange={(e) => setSection80D(prev => ({ ...prev, selfAndFamily: Number(e.target.value) || 0 }))}
                     placeholder="Premium for self and family"
                   />
@@ -255,7 +298,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="parents"
                     type="number"
-                    value={section80D.parents || ''}
+                    value={section80D.parents === 0 ? '' : section80D.parents}
                     onChange={(e) => setSection80D(prev => ({ ...prev, parents: Number(e.target.value) || 0 }))}
                     placeholder="Premium for parents"
                   />
@@ -265,7 +308,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="healthCheckup"
                     type="number"
-                    value={section80D.preventiveHealthCheckup || ''}
+                    value={section80D.preventiveHealthCheckup === 0 ? '' : section80D.preventiveHealthCheckup}
                     onChange={(e) => setSection80D(prev => ({ ...prev, preventiveHealthCheckup: Number(e.target.value) || 0 }))}
                     placeholder="Health checkup expenses"
                   />
@@ -308,6 +351,25 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
+                <CardTitle className="text-red-600">Professional Tax - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="professionalTax">Annual Professional Tax</Label>
+                <Input
+                  id="professionalTax"
+                  type="number"
+                  value={professionalTax === 0 ? '' : professionalTax}
+                  onChange={(e) => setProfessionalTax(Number(e.target.value) || 0)}
+                  placeholder="Enter professional tax paid"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹2,500 per year
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle className="text-orange-600">Home Loan Interest (Section 24b) - Old Regime Only</CardTitle>
               </CardHeader>
               <CardContent>
@@ -315,7 +377,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="homeLoan"
                   type="number"
-                  value={homeLoanInterest || ''}
+                  value={homeLoanInterest === 0 ? '' : homeLoanInterest}
                   onChange={(e) => setHomeLoanInterest(Number(e.target.value) || 0)}
                   placeholder="Enter home loan interest"
                 />
@@ -334,7 +396,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="savings"
                   type="number"
-                  value={savingsInterest || ''}
+                  value={savingsInterest === 0 ? '' : savingsInterest}
                   onChange={(e) => setSavingsInterest(Number(e.target.value) || 0)}
                   placeholder="Enter savings account interest"
                 />
@@ -343,7 +405,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="age"
                     type="number"
-                    value={userAge || ''}
+                    value={userAge === 0 ? '' : userAge}
                     onChange={(e) => setUserAge(Number(e.target.value) || 30)}
                     placeholder="Enter your age"
                   />
@@ -363,7 +425,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="nps"
                   type="number"
-                  value={npsContribution || ''}
+                  value={npsContribution === 0 ? '' : npsContribution}
                   onChange={(e) => setNpsContribution(Number(e.target.value) || 0)}
                   placeholder="Enter additional NPS contribution"
                 />
@@ -382,12 +444,149 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="lta"
                   type="number"
-                  value={lta || ''}
+                  value={lta === 0 ? '' : lta}
                   onChange={(e) => setLta(Number(e.target.value) || 0)}
                   placeholder="Enter LTA exemption"
                 />
                 <p className="text-sm text-gray-600 mt-2">
                   As per actual bills for domestic travel
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-pink-600">Education Loan Interest (80E) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="education">Education Loan Interest</Label>
+                <Input
+                  id="education"
+                  type="number"
+                  value={section80E === 0 ? '' : section80E}
+                  onChange={(e) => setSection80E(Number(e.target.value) || 0)}
+                  placeholder="Enter education loan interest"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  No upper limit (for 8 years)
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="additional" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-blue-500">Donations (80G) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="donations">Charitable Donations</Label>
+                <Input
+                  id="donations"
+                  type="number"
+                  value={section80G === 0 ? '' : section80G}
+                  onChange={(e) => setSection80G(Number(e.target.value) || 0)}
+                  placeholder="Enter donation amount"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  50% or 100% deduction as per donation type
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-green-500">First Time Home Buyer (80EE) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="firstHome">Additional Home Loan Interest</Label>
+                <Input
+                  id="firstHome"
+                  type="number"
+                  value={section80EE === 0 ? '' : section80EE}
+                  onChange={(e) => setSection80EE(Number(e.target.value) || 0)}
+                  placeholder="Enter additional interest"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹50,000 for first time buyers
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-500">Electric Vehicle Loan (80EEA) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="evLoan">EV Loan Interest</Label>
+                <Input
+                  id="evLoan"
+                  type="number"
+                  value={section80EEA === 0 ? '' : section80EEA}
+                  onChange={(e) => setSection80EEA(Number(e.target.value) || 0)}
+                  placeholder="Enter EV loan interest"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹1.5 lakh
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-purple-500">Disability (80U) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="disability">Disability Deduction</Label>
+                <Input
+                  id="disability"
+                  type="number"
+                  value={section80U === 0 ? '' : section80U}
+                  onChange={(e) => setSection80U(Number(e.target.value) || 0)}
+                  placeholder="Enter disability deduction"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  ₹75,000 (normal) or ₹1.25 lakh (severe)
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-orange-500">Gratuity Exemption - Both Regimes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="gratuity">Gratuity Received</Label>
+                <Input
+                  id="gratuity"
+                  type="number"
+                  value={gratuity === 0 ? '' : gratuity}
+                  onChange={(e) => setGratuity(Number(e.target.value) || 0)}
+                  placeholder="Enter gratuity amount"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Exempt as per rules
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-cyan-500">Leave Encashment - Both Regimes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="leave">Leave Encashment</Label>
+                <Input
+                  id="leave"
+                  type="number"
+                  value={leaveEncashment === 0 ? '' : leaveEncashment}
+                  onChange={(e) => setLeaveEncashment(Number(e.target.value) || 0)}
+                  placeholder="Enter leave encashment"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Exempt as per rules
                 </p>
               </CardContent>
             </Card>
@@ -410,6 +609,14 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     <span>HRA Exemption:</span>
                     <span className="font-semibold">{formatCurrency(calculations.hraDeduction)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Gratuity:</span>
+                    <span className="font-semibold">{formatCurrency(gratuity)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Leave Encashment:</span>
+                    <span className="font-semibold">{formatCurrency(leaveEncashment)}</span>
+                  </div>
                 </div>
                 
                 <div className="space-y-3">
@@ -423,20 +630,20 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     <span className="font-semibold">{formatCurrency(calculations.section80DResult.total)}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span>Professional Tax:</span>
+                    <span className="font-semibold">{formatCurrency(professionalTax)}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span>Home Loan Interest:</span>
                     <span className="font-semibold">{formatCurrency(calculations.homeLoanDeduction)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Savings Interest:</span>
-                    <span className="font-semibold">{formatCurrency(calculations.savingsDeduction)}</span>
+                    <span>Education Loan:</span>
+                    <span className="font-semibold">{formatCurrency(section80E)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>NPS (80CCD-1B):</span>
-                    <span className="font-semibold">{formatCurrency(calculations.npsDeduction)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>LTA:</span>
-                    <span className="font-semibold">{formatCurrency(lta)}</span>
+                    <span>Other Deductions:</span>
+                    <span className="font-semibold">{formatCurrency(section80G + section80EE + section80EEA + section80U)}</span>
                   </div>
                 </div>
               </div>
@@ -444,7 +651,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <hr className="my-4" />
               <div className="flex justify-between text-lg font-bold text-green-600">
                 <span>Total Deductions:</span>
-                <span>{formatCurrency(calculations.totalDeductions)}</span>
+                <span>{formatCurrency(totalDeductions)}</span>
               </div>
             </CardContent>
           </Card>

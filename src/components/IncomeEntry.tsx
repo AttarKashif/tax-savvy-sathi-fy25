@@ -25,20 +25,38 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
         <CardHeader>
           <CardTitle className="text-lg text-blue-600">Salary Income</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="salary">Annual Salary (including allowances)</Label>
+            <Label htmlFor="salary">Annual Salary (including all allowances)</Label>
             <Input
               id="salary"
               type="number"
-              value={income.salary || ''}
+              value={income.salary === 0 ? '' : income.salary}
               onChange={(e) => updateIncome('salary', Number(e.target.value) || 0)}
-              placeholder="Enter your annual salary"
+              placeholder="Enter your total annual salary"
               className="mt-1"
             />
             {income.salary > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.salary)}</p>
             )}
+          </div>
+          
+          <div>
+            <Label htmlFor="basicSalary">Basic Salary (Annual)</Label>
+            <Input
+              id="basicSalary"
+              type="number"
+              value={income.basicSalary === 0 ? '' : income.basicSalary}
+              onChange={(e) => updateIncome('basicSalary', Number(e.target.value) || 0)}
+              placeholder="Enter your basic salary (for HRA calculation)"
+              className="mt-1"
+            />
+            {income.basicSalary > 0 && (
+              <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.basicSalary)}</p>
+            )}
+            <p className="text-xs text-blue-600 mt-1">
+              Basic salary is used for HRA calculation. It's typically 40-50% of annual salary.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -53,7 +71,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
             <Input
               id="business"
               type="number"
-              value={income.businessIncome || ''}
+              value={income.businessIncome === 0 ? '' : income.businessIncome}
               onChange={(e) => updateIncome('businessIncome', Number(e.target.value) || 0)}
               placeholder="Enter business/professional income"
               className="mt-1"
@@ -75,7 +93,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
             <Input
               id="capitalShort"
               type="number"
-              value={income.capitalGainsShort || ''}
+              value={income.capitalGainsShort === 0 ? '' : income.capitalGainsShort}
               onChange={(e) => updateIncome('capitalGainsShort', Number(e.target.value) || 0)}
               placeholder="Enter short-term capital gains"
               className="mt-1"
@@ -90,7 +108,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
             <Input
               id="capitalLong"
               type="number"
-              value={income.capitalGainsLong || ''}
+              value={income.capitalGainsLong === 0 ? '' : income.capitalGainsLong}
               onChange={(e) => updateIncome('capitalGainsLong', Number(e.target.value) || 0)}
               placeholder="Enter long-term capital gains"
               className="mt-1"
@@ -112,7 +130,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
             <Input
               id="otherSources"
               type="number"
-              value={income.otherSources || ''}
+              value={income.otherSources === 0 ? '' : income.otherSources}
               onChange={(e) => updateIncome('otherSources', Number(e.target.value) || 0)}
               placeholder="Enter income from other sources"
               className="mt-1"

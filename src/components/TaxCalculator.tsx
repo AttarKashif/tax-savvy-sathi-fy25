@@ -15,6 +15,7 @@ export const TaxCalculator = () => {
   const [age, setAge] = useState<number>(30);
   const [income, setIncome] = useState<IncomeData>({
     salary: 0,
+    basicSalary: 0,
     businessIncome: 0,
     capitalGainsShort: 0,
     capitalGainsLong: 0,
@@ -28,7 +29,19 @@ export const TaxCalculator = () => {
     lta: 0,
     homeLoanInterest: 0,
     section80TTA: 0,
-    nps: 0
+    nps: 0,
+    professionalTax: 0,
+    section80E: 0,
+    section80G: 0,
+    section80EE: 0,
+    section80EEA: 0,
+    section80U: 0,
+    section80DDB: 0,
+    section80CCG: 0,
+    section80CCC: 0,
+    section80CCD: 0,
+    gratuity: 0,
+    leaveEncashment: 0
   });
 
   const [activeTab, setActiveTab] = useState('chat');
@@ -107,8 +120,8 @@ export const TaxCalculator = () => {
                       <Input
                         id="age"
                         type="number"
-                        value={age}
-                        onChange={(e) => setAge(Number(e.target.value))}
+                        value={age === 0 ? '' : age}
+                        onChange={(e) => setAge(Number(e.target.value) || 0)}
                         min="18"
                         max="100"
                         className="mt-1"
