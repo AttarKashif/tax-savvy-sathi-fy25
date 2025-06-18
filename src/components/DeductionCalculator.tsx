@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -63,20 +64,36 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
   const [lta, setLta] = useState(0);
   const [userAge, setUserAge] = useState(30);
 
-  // Calculations
-  const hraDeduction = calculateMaxHRA(hraData);
-  const section80CResult = calculateSection80C(section80C);
-  const section80DResult = calculateSection80D(section80D);
-  const homeLoanDeduction = calculateHomeLoanInterest(homeLoanInterest);
-  const savingsDeduction = calculateSection80TTA(savingsInterest, userAge);
-  const npsDeduction = calculateNPSDeduction(npsContribution);
+  // Memoized calculations to prevent unnecessary recalculations
+  const calculations = useMemo(() => {
+    const hraDeduction = calculateMaxHRA(hraData);
+    const section80CResult = calculateSection80C(section80C);
+    const section80DResult = calculateSection80D(section80D);
+    const homeLoanDeduction = calculateHomeLoanInterest(homeLoanInterest);
+    const savingsDeduction = calculateSection80TTA(savingsInterest, userAge);
+    const npsDeduction = calculateNPSDeduction(npsContribution);
 
-  const totalDeductions = hraDeduction + section80CResult.total + section80DResult.total + 
-                         homeLoanDeduction + savingsDeduction + npsDeduction + lta;
+    const totalDeductions = hraDeduction + section80CResult.total + section80DResult.total + 
+                           homeLoanDeduction + savingsDeduction + npsDeduction + lta;
 
+    return {
+      hraDeduction,
+      section80CResult,
+      section80DResult,
+      homeLoanDeduction,
+      savingsDeduction,
+      npsDeduction,
+      totalDeductions
+    };
+  }, [hraData, section80C, section80D, homeLoanInterest, savingsInterest, npsContribution, lta, userAge]);
+
+  // Use useCallback to stabilize the onDeductionsUpdate call
+  const stableOnDeductionsUpdate = useCallback(onDeductionsUpdate, []);
+
+  // Update parent component when total deductions change
   React.useEffect(() => {
-    onDeductionsUpdate(totalDeductions);
-  }, [totalDeductions, onDeductionsUpdate]);
+    stableOnDeductionsUpdate(calculations.totalDeductions);
+  }, [calculations.totalDeductions, stableOnDeductionsUpdate]);
 
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString('en-IN')}`;
 
@@ -114,8 +131,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="basicSalary"
                     type="number"
-                    value={hraData.basicSalary}
-                    onChange={(e) => setHraData(prev => ({ ...prev, basicSalary: Number(e.target.value) }))}
+                    value={hraData.basicSalary || ''}
+                    onChange={(e) => setHraData(prev => ({ ...prev, basicSalary: Number(e.target.value) || 0 }))}
                     placeholder="Enter basic salary"
                   />
                 </div>
@@ -124,8 +141,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="hraReceived"
                     type="number"
-                    value={hraData.hraReceived}
-                    onChange={(e) => setHraData(prev => ({ ...prev, hraReceived: Number(e.target.value) }))}
+                    value={hraData.hraReceived || ''}
+                    onChange={(e) => setHraData(prev => ({ ...prev, hraReceived: Number(e.target.value) || 0 }))}
                     placeholder="Enter HRA received"
                   />
                 </div>
@@ -134,8 +151,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="rentPaid"
                     type="number"
-                    value={hraData.rentPaid}
-                    onChange={(e) => setHraData(prev => ({ ...prev, rentPaid: Number(e.target.value) }))}
+                    value={hraData.rentPaid || ''}
+                    onChange={(e) => setHraData(prev => ({ ...prev, rentPaid: Number(e.target.value) || 0 }))}
                     placeholder="Enter rent paid"
                   />
                 </div>
@@ -156,7 +173,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <p>• Rent paid minus 10% of basic: {formatCurrency(Math.max(0, hraData.rentPaid - hraData.basicSalary * 0.1))}</p>
                 </div>
                 <p className="text-lg font-bold text-green-600 mt-2">
-                  Maximum HRA Exemption: {formatCurrency(hraDeduction)}
+                  Maximum HRA Exemption: {formatCurrency(calculations.hraDeduction)}
                 </p>
               </div>
             </CardContent>
@@ -176,8 +193,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     <Input
                       id={key}
                       type="number"
-                      value={value}
-                      onChange={(e) => setSection80C(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                      value={value || ''}
+                      onChange={(e) => setSection80C(prev => ({ ...prev, [key]: Number(e.target.value) || 0 }))}
                       placeholder={`Enter ${key} amount`}
                     />
                   </div>
@@ -188,12 +205,12 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <h3 className="font-semibold text-blue-800 mb-2">Section 80C Summary</h3>
                 <p className="text-lg">Total Investments: {formatCurrency(Object.values(section80C).reduce((sum, val) => sum + val, 0))}</p>
                 <p className="text-lg font-bold text-blue-600">
-                  Eligible Deduction: {formatCurrency(section80CResult.total)}
-                  {section80CResult.maxReached && <span className="text-green-600 ml-2">✓ Maximum limit reached</span>}
+                  Eligible Deduction: {formatCurrency(calculations.section80CResult.total)}
+                  {calculations.section80CResult.maxReached && <span className="text-green-600 ml-2">✓ Maximum limit reached</span>}
                 </p>
-                {!section80CResult.maxReached && (
+                {!calculations.section80CResult.maxReached && (
                   <p className="text-sm text-gray-600">
-                    You can invest {formatCurrency(150000 - section80CResult.total)} more to reach the maximum limit
+                    You can invest {formatCurrency(150000 - calculations.section80CResult.total)} more to reach the maximum limit
                   </p>
                 )}
               </div>
@@ -213,8 +230,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="selfFamily"
                     type="number"
-                    value={section80D.selfAndFamily}
-                    onChange={(e) => setSection80D(prev => ({ ...prev, selfAndFamily: Number(e.target.value) }))}
+                    value={section80D.selfAndFamily || ''}
+                    onChange={(e) => setSection80D(prev => ({ ...prev, selfAndFamily: Number(e.target.value) || 0 }))}
                     placeholder="Premium for self and family"
                   />
                 </div>
@@ -223,8 +240,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="parents"
                     type="number"
-                    value={section80D.parents}
-                    onChange={(e) => setSection80D(prev => ({ ...prev, parents: Number(e.target.value) }))}
+                    value={section80D.parents || ''}
+                    onChange={(e) => setSection80D(prev => ({ ...prev, parents: Number(e.target.value) || 0 }))}
                     placeholder="Premium for parents"
                   />
                 </div>
@@ -233,8 +250,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="healthCheckup"
                     type="number"
-                    value={section80D.preventiveHealthCheckup}
-                    onChange={(e) => setSection80D(prev => ({ ...prev, preventiveHealthCheckup: Number(e.target.value) }))}
+                    value={section80D.preventiveHealthCheckup || ''}
+                    onChange={(e) => setSection80D(prev => ({ ...prev, preventiveHealthCheckup: Number(e.target.value) || 0 }))}
                     placeholder="Health checkup expenses"
                   />
                 </div>
@@ -260,12 +277,12 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <div className="bg-green-50 p-4 rounded-lg">
                 <h3 className="font-semibold text-green-800 mb-2">Section 80D Summary</h3>
                 <div className="space-y-1 text-sm">
-                  <p>• Self & Family: {formatCurrency(section80DResult.breakdown.selfAndFamily)} (Limit: {formatCurrency(section80DResult.limits.selfLimit)})</p>
-                  <p>• Parents: {formatCurrency(section80DResult.breakdown.parents)} (Limit: {formatCurrency(section80DResult.limits.parentLimit)})</p>
-                  <p>• Health Checkup: {formatCurrency(section80DResult.breakdown.preventiveHealthCheckup)} (Limit: {formatCurrency(section80DResult.limits.healthCheckupLimit)})</p>
+                  <p>• Self & Family: {formatCurrency(calculations.section80DResult.breakdown.selfAndFamily)} (Limit: {formatCurrency(calculations.section80DResult.limits.selfLimit)})</p>
+                  <p>• Parents: {formatCurrency(calculations.section80DResult.breakdown.parents)} (Limit: {formatCurrency(calculations.section80DResult.limits.parentLimit)})</p>
+                  <p>• Health Checkup: {formatCurrency(calculations.section80DResult.breakdown.preventiveHealthCheckup)} (Limit: {formatCurrency(calculations.section80DResult.limits.healthCheckupLimit)})</p>
                 </div>
                 <p className="text-lg font-bold text-green-600 mt-2">
-                  Total Deduction: {formatCurrency(section80DResult.total)}
+                  Total Deduction: {formatCurrency(calculations.section80DResult.total)}
                 </p>
               </div>
             </CardContent>
@@ -283,12 +300,12 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="homeLoan"
                   type="number"
-                  value={homeLoanInterest}
-                  onChange={(e) => setHomeLoanInterest(Number(e.target.value))}
+                  value={homeLoanInterest || ''}
+                  onChange={(e) => setHomeLoanInterest(Number(e.target.value) || 0)}
                   placeholder="Enter home loan interest"
                 />
                 <p className="text-sm text-gray-600 mt-2">
-                  Eligible: {formatCurrency(homeLoanDeduction)}
+                  Eligible: {formatCurrency(calculations.homeLoanDeduction)}
                 </p>
               </CardContent>
             </Card>
@@ -302,8 +319,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="savings"
                   type="number"
-                  value={savingsInterest}
-                  onChange={(e) => setSavingsInterest(Number(e.target.value))}
+                  value={savingsInterest || ''}
+                  onChange={(e) => setSavingsInterest(Number(e.target.value) || 0)}
                   placeholder="Enter savings account interest"
                 />
                 <div className="mt-2">
@@ -311,13 +328,13 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <Input
                     id="age"
                     type="number"
-                    value={userAge}
-                    onChange={(e) => setUserAge(Number(e.target.value))}
+                    value={userAge || ''}
+                    onChange={(e) => setUserAge(Number(e.target.value) || 30)}
                     placeholder="Enter your age"
                   />
                 </div>
                 <p className="text-sm text-gray-600 mt-2">
-                  Limit: {formatCurrency(userAge >= 60 ? 50000 : 10000)} | Eligible: {formatCurrency(savingsDeduction)}
+                  Limit: {formatCurrency(userAge >= 60 ? 50000 : 10000)} | Eligible: {formatCurrency(calculations.savingsDeduction)}
                 </p>
               </CardContent>
             </Card>
@@ -331,12 +348,12 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="nps"
                   type="number"
-                  value={npsContribution}
-                  onChange={(e) => setNpsContribution(Number(e.target.value))}
+                  value={npsContribution || ''}
+                  onChange={(e) => setNpsContribution(Number(e.target.value) || 0)}
                   placeholder="Enter additional NPS contribution"
                 />
                 <p className="text-sm text-gray-600 mt-2">
-                  Eligible: {formatCurrency(npsDeduction)}
+                  Eligible: {formatCurrency(calculations.npsDeduction)}
                 </p>
               </CardContent>
             </Card>
@@ -350,8 +367,8 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <Input
                   id="lta"
                   type="number"
-                  value={lta}
-                  onChange={(e) => setLta(Number(e.target.value))}
+                  value={lta || ''}
+                  onChange={(e) => setLta(Number(e.target.value) || 0)}
                   placeholder="Enter LTA exemption"
                 />
               </CardContent>
@@ -371,27 +388,27 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>HRA Exemption:</span>
-                  <span className="font-semibold">{formatCurrency(hraDeduction)}</span>
+                  <span className="font-semibold">{formatCurrency(calculations.hraDeduction)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Section 80C:</span>
-                  <span className="font-semibold">{formatCurrency(section80CResult.total)}</span>
+                  <span className="font-semibold">{formatCurrency(calculations.section80CResult.total)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Section 80D:</span>
-                  <span className="font-semibold">{formatCurrency(section80DResult.total)}</span>
+                  <span className="font-semibold">{formatCurrency(calculations.section80DResult.total)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Home Loan Interest:</span>
-                  <span className="font-semibold">{formatCurrency(homeLoanDeduction)}</span>
+                  <span className="font-semibold">{formatCurrency(calculations.homeLoanDeduction)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Savings Interest:</span>
-                  <span className="font-semibold">{formatCurrency(savingsDeduction)}</span>
+                  <span className="font-semibold">{formatCurrency(calculations.savingsDeduction)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>NPS (80CCD-1B):</span>
-                  <span className="font-semibold">{formatCurrency(npsDeduction)}</span>
+                  <span className="font-semibold">{formatCurrency(calculations.npsDeduction)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>LTA:</span>
@@ -400,7 +417,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <hr className="my-3" />
                 <div className="flex justify-between text-lg font-bold text-green-600">
                   <span>Total Deductions:</span>
-                  <span>{formatCurrency(totalDeductions)}</span>
+                  <span>{formatCurrency(calculations.totalDeductions)}</span>
                 </div>
               </div>
             </CardContent>

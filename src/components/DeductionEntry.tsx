@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DeductionData } from '@/utils/taxCalculations';
 import { DeductionCalculator } from './DeductionCalculator';
 
@@ -9,10 +9,10 @@ interface DeductionEntryProps {
 }
 
 export const DeductionEntry: React.FC<DeductionEntryProps> = ({ deductions, setDeductions }) => {
-  const handleDeductionsUpdate = (totalDeductions: number) => {
+  const handleDeductionsUpdate = useCallback((totalDeductions: number) => {
     // For now, we'll update the main deduction object with the total
     // In a more sophisticated implementation, we'd track individual components
-    setDeductions({
+    const newDeductions = {
       ...deductions,
       section80C: Math.min(totalDeductions * 0.4, 150000), // Rough allocation
       section80D: Math.min(totalDeductions * 0.1, 75000),
@@ -20,8 +20,17 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({ deductions, setD
       lta: Math.min(totalDeductions * 0.05, totalDeductions),
       homeLoanInterest: Math.min(totalDeductions * 0.1, 200000),
       section80TTA: Math.min(totalDeductions * 0.05, 50000)
-    });
-  };
+    };
+    
+    // Only update if there's an actual change to prevent unnecessary re-renders
+    const hasChanged = Object.keys(newDeductions).some(
+      key => newDeductions[key as keyof DeductionData] !== deductions[key as keyof DeductionData]
+    );
+    
+    if (hasChanged) {
+      setDeductions(newDeductions);
+    }
+  }, [deductions, setDeductions]);
 
   return (
     <div className="space-y-6">
