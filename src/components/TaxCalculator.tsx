@@ -1,7 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,21 +27,16 @@ export const TaxCalculator = () => {
     hra: 0,
     lta: 0,
     homeLoanInterest: 0,
-    section80TTA: 0
+    section80TTA: 0,
+    nps: 0
   });
 
   const [activeTab, setActiveTab] = useState('chat');
   const [showResults, setShowResults] = useState(false);
 
   const oldRegimeResult = calculateOldRegimeTax(income, deductions, age);
-  const newRegimeResult = calculateNewRegimeTax(income, age);
-  const recommendation: {
-    recommendedRegime: 'old' | 'new';
-    savings: number;
-    percentageSavings: number;
-    oldRegimeTax: number;
-    newRegimeTax: number;
-  } = getOptimalRegime(oldRegimeResult, newRegimeResult);
+  const newRegimeResult = calculateNewRegimeTax(income, deductions, age);
+  const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
 
   const handleCalculate = () => {
     setShowResults(true);
@@ -123,18 +117,18 @@ export const TaxCalculator = () => {
                   </div>
                   
                   <IncomeEntry income={income} setIncome={setIncome} />
-                  
-                  {hasValidIncome && (
-                    <Button onClick={handleCalculate} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                      Calculate Tax
-                    </Button>
-                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="deductions" className="space-y-6">
-              <DeductionEntry deductions={deductions} setDeductions={setDeductions} />
+              <DeductionEntry 
+                deductions={deductions} 
+                setDeductions={setDeductions}
+                income={income}
+                onCalculate={handleCalculate}
+                hasValidIncome={hasValidIncome}
+              />
             </TabsContent>
 
             <TabsContent value="results" className="space-y-6">

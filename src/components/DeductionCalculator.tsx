@@ -1,12 +1,11 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calculator, Info, TrendingUp } from 'lucide-react';
+import { DeductionData } from '@/utils/taxCalculations';
 import { 
   calculateMaxHRA, 
   calculateSection80C, 
@@ -20,12 +19,14 @@ import {
 } from '@/utils/deductionCalculations';
 
 interface DeductionCalculatorProps {
-  onDeductionsUpdate: (totalDeductions: number) => void;
+  onDeductionsUpdate: (deductions: DeductionData) => void;
+  currentDeductions: DeductionData;
   basicSalary?: number;
 }
 
 export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({ 
   onDeductionsUpdate, 
+  currentDeductions,
   basicSalary = 0 
 }) => {
   // HRA State
@@ -64,8 +65,13 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
   const [lta, setLta] = useState(0);
   const [userAge, setUserAge] = useState(30);
 
-  // Memoized calculations to prevent unnecessary recalculations
-  const calculations = useMemo(() => {
+  // Update basic salary when it changes
+  useEffect(() => {
+    setHraData(prev => ({ ...prev, basicSalary }));
+  }, [basicSalary]);
+
+  // Calculate and update deductions whenever inputs change
+  useEffect(() => {
     const hraDeduction = calculateMaxHRA(hraData);
     const section80CResult = calculateSection80C(section80C);
     const section80DResult = calculateSection80D(section80D);
@@ -73,38 +79,40 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
     const savingsDeduction = calculateSection80TTA(savingsInterest, userAge);
     const npsDeduction = calculateNPSDeduction(npsContribution);
 
-    const totalDeductions = hraDeduction + section80CResult.total + section80DResult.total + 
-                           homeLoanDeduction + savingsDeduction + npsDeduction + lta;
-
-    return {
-      hraDeduction,
-      section80CResult,
-      section80DResult,
-      homeLoanDeduction,
-      savingsDeduction,
-      npsDeduction,
-      totalDeductions
+    const newDeductions: DeductionData = {
+      section80C: section80CResult.total,
+      section80D: section80DResult.total,
+      hra: hraDeduction,
+      lta: lta,
+      homeLoanInterest: homeLoanDeduction,
+      section80TTA: savingsDeduction,
+      nps: npsDeduction
     };
-  }, [hraData, section80C, section80D, homeLoanInterest, savingsInterest, npsContribution, lta, userAge]);
 
-  // Use useCallback to stabilize the onDeductionsUpdate call
-  const stableOnDeductionsUpdate = useCallback(onDeductionsUpdate, []);
-
-  // Update parent component when total deductions change
-  React.useEffect(() => {
-    stableOnDeductionsUpdate(calculations.totalDeductions);
-  }, [calculations.totalDeductions, stableOnDeductionsUpdate]);
+    onDeductionsUpdate(newDeductions);
+  }, [hraData, section80C, section80D, homeLoanInterest, savingsInterest, npsContribution, lta, userAge, onDeductionsUpdate]);
 
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString('en-IN')}`;
+
+  const calculations = {
+    hraDeduction: calculateMaxHRA(hraData),
+    section80CResult: calculateSection80C(section80C),
+    section80DResult: calculateSection80D(section80D),
+    homeLoanDeduction: calculateHomeLoanInterest(homeLoanInterest),
+    savingsDeduction: calculateSection80TTA(savingsInterest, userAge),
+    npsDeduction: calculateNPSDeduction(npsContribution),
+    totalDeductions: currentDeductions.hra + currentDeductions.section80C + currentDeductions.section80D + 
+                    currentDeductions.homeLoanInterest + currentDeductions.section80TTA + (currentDeductions.nps || 0) + currentDeductions.lta
+  };
 
   return (
     <div className="space-y-6">
       <div className="bg-blue-50 p-4 rounded-lg">
         <h2 className="text-xl font-bold text-blue-800 mb-2 flex items-center gap-2">
           <Calculator className="w-5 h-5" />
-          Smart Deduction Calculator
+          Smart Deduction Calculator (FY 2024-25)
         </h2>
-        <p className="text-blue-700">Calculate maximum eligible deductions with automatic optimization</p>
+        <p className="text-blue-700">Calculate maximum eligible deductions according to Indian Income Tax Act</p>
       </div>
 
       <Tabs defaultValue="hra" className="w-full">
@@ -121,10 +129,17 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-purple-600">
                 <TrendingUp className="w-5 h-5" />
-                House Rent Allowance (HRA) Calculator
+                House Rent Allowance (HRA) - Applicable for Both Regimes
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-amber-50 p-3 rounded-lg text-sm">
+                <p className="text-amber-800">
+                  <strong>Note:</strong> HRA exemption is available in both Old and New Tax Regimes. 
+                  The exemption is minimum of: Actual HRA received, 50%/40% of basic salary, or Rent paid minus 10% of basic salary.
+                </p>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="basicSalary">Basic Salary (Annual)</Label>
@@ -161,7 +176,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     checked={hraData.isMetroCity}
                     onCheckedChange={(checked) => setHraData(prev => ({ ...prev, isMetroCity: checked }))}
                   />
-                  <Label>Metro City (50% vs 40% of basic salary)</Label>
+                  <Label>Metro City (Mumbai, Delhi, Chennai, Kolkata)</Label>
                 </div>
               </div>
               
@@ -183,7 +198,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
         <TabsContent value="80c" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-blue-600">Section 80C - Investment Deductions (Max: ₹1.5 Lakh)</CardTitle>
+              <CardTitle className="text-blue-600">Section 80C - Investment Deductions (Max: ₹1.5 Lakh) - Old Regime Only</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -221,7 +236,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
         <TabsContent value="80d" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-green-600">Section 80D - Medical Insurance</CardTitle>
+              <CardTitle className="text-green-600">Section 80D - Medical Insurance - Old Regime Only</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -293,10 +308,10 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-orange-600">Home Loan Interest (Section 24b)</CardTitle>
+                <CardTitle className="text-orange-600">Home Loan Interest (Section 24b) - Old Regime Only</CardTitle>
               </CardHeader>
               <CardContent>
-                <Label htmlFor="homeLoan">Annual Interest (Max: ₹2 Lakh)</Label>
+                <Label htmlFor="homeLoan">Annual Interest (Max: ₹2 Lakh for self-occupied)</Label>
                 <Input
                   id="homeLoan"
                   type="number"
@@ -312,7 +327,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-indigo-600">Savings Interest (80TTA/80TTB)</CardTitle>
+                <CardTitle className="text-indigo-600">Savings Interest (80TTA/80TTB) - Old Regime Only</CardTitle>
               </CardHeader>
               <CardContent>
                 <Label htmlFor="savings">Annual Savings Interest</Label>
@@ -341,7 +356,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-600">NPS (80CCD-1B)</CardTitle>
+                <CardTitle className="text-purple-600">NPS (80CCD-1B) - Old Regime Only</CardTitle>
               </CardHeader>
               <CardContent>
                 <Label htmlFor="nps">Additional NPS Contribution (Max: ₹50,000)</Label>
@@ -360,7 +375,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-teal-600">Leave Travel Allowance (LTA)</CardTitle>
+                <CardTitle className="text-teal-600">Leave Travel Allowance (LTA) - Old Regime Only</CardTitle>
               </CardHeader>
               <CardContent>
                 <Label htmlFor="lta">LTA Exemption</Label>
@@ -371,6 +386,9 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   onChange={(e) => setLta(Number(e.target.value) || 0)}
                   placeholder="Enter LTA exemption"
                 />
+                <p className="text-sm text-gray-600 mt-2">
+                  As per actual bills for domestic travel
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -385,40 +403,48 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>HRA Exemption:</span>
-                  <span className="font-semibold">{formatCurrency(calculations.hraDeduction)}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-blue-600">Applicable to Both Regimes:</h3>
+                  <div className="flex justify-between">
+                    <span>HRA Exemption:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.hraDeduction)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Section 80C:</span>
-                  <span className="font-semibold">{formatCurrency(calculations.section80CResult.total)}</span>
+                
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-yellow-600">Old Regime Only:</h3>
+                  <div className="flex justify-between">
+                    <span>Section 80C:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.section80CResult.total)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Section 80D:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.section80DResult.total)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Home Loan Interest:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.homeLoanDeduction)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Savings Interest:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.savingsDeduction)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>NPS (80CCD-1B):</span>
+                    <span className="font-semibold">{formatCurrency(calculations.npsDeduction)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>LTA:</span>
+                    <span className="font-semibold">{formatCurrency(lta)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Section 80D:</span>
-                  <span className="font-semibold">{formatCurrency(calculations.section80DResult.total)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Home Loan Interest:</span>
-                  <span className="font-semibold">{formatCurrency(calculations.homeLoanDeduction)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Savings Interest:</span>
-                  <span className="font-semibold">{formatCurrency(calculations.savingsDeduction)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>NPS (80CCD-1B):</span>
-                  <span className="font-semibold">{formatCurrency(calculations.npsDeduction)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>LTA:</span>
-                  <span className="font-semibold">{formatCurrency(lta)}</span>
-                </div>
-                <hr className="my-3" />
-                <div className="flex justify-between text-lg font-bold text-green-600">
-                  <span>Total Deductions:</span>
-                  <span>{formatCurrency(calculations.totalDeductions)}</span>
-                </div>
+              </div>
+              
+              <hr className="my-4" />
+              <div className="flex justify-between text-lg font-bold text-green-600">
+                <span>Total Deductions:</span>
+                <span>{formatCurrency(calculations.totalDeductions)}</span>
               </div>
             </CardContent>
           </Card>

@@ -22,6 +22,7 @@ export interface DeductionData {
   lta: number;
   homeLoanInterest: number;
   section80TTA: number;
+  nps?: number; // 80CCD(1B)
 }
 
 export interface TaxResult {
@@ -104,7 +105,8 @@ export function calculateOldRegimeTax(
   const standardDeduction = Math.min(income.salary, 50000);
   
   const totalDeductions = standardDeduction + deductions.section80C + deductions.section80D + 
-                         deductions.hra + deductions.lta + deductions.homeLoanInterest + deductions.section80TTA;
+                         deductions.hra + deductions.lta + deductions.homeLoanInterest + 
+                         deductions.section80TTA + (deductions.nps || 0);
   
   const taxableIncome = Math.max(0, grossIncome - totalDeductions);
   
@@ -137,13 +139,14 @@ export function calculateOldRegimeTax(
   };
 }
 
-export function calculateNewRegimeTax(income: IncomeData, age: number): TaxResult {
+export function calculateNewRegimeTax(income: IncomeData, deductions: DeductionData, age: number): TaxResult {
   const grossIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
   
   // Standard deduction for salary (₹75,000 in new regime as per Budget 2024)
   const standardDeduction = Math.min(income.salary, 75000);
   
-  const totalDeductions = standardDeduction;
+  // In new regime, only HRA and standard deduction are allowed
+  const totalDeductions = standardDeduction + deductions.hra;
   const taxableIncome = Math.max(0, grossIncome - totalDeductions);
   
   const taxBeforeRebate = calculateTaxOnSlabs(taxableIncome, newRegimeSlabs);
