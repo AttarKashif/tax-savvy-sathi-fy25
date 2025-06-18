@@ -36,7 +36,13 @@ export const TaxCalculator = () => {
 
   const oldRegimeResult = calculateOldRegimeTax(income, deductions, age);
   const newRegimeResult = calculateNewRegimeTax(income, age);
-  const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
+  const recommendation: {
+    recommendedRegime: 'old' | 'new';
+    savings: number;
+    percentageSavings: number;
+    oldRegimeTax: number;
+    newRegimeTax: number;
+  } = getOptimalRegime(oldRegimeResult, newRegimeResult);
 
   const handleCalculate = () => {
     setShowResults(true);

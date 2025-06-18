@@ -81,7 +81,7 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'salary':
         if (numericValue >= 0) {
-          setIncome(prev => ({ ...prev, salary: numericValue }));
+          setIncome({ ...income, salary: numericValue });
           if (numericValue > 0) {
             addMessage(`Perfect! I've recorded your salary as ₹${numericValue.toLocaleString('en-IN')}. Do you have any business or professional income? If yes, enter the amount, otherwise type 0.`, 'ai');
           } else {
@@ -95,7 +95,7 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'business':
         if (numericValue >= 0) {
-          setIncome(prev => ({ ...prev, businessIncome: numericValue }));
+          setIncome({ ...income, businessIncome: numericValue });
           if (numericValue > 0) {
             addMessage(`Noted! Business income: ₹${numericValue.toLocaleString('en-IN')}. Do you have any capital gains from investments? Enter short-term capital gains amount (or 0 if none).`, 'ai');
           } else {
@@ -109,7 +109,7 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'capitalShort':
         if (numericValue >= 0) {
-          setIncome(prev => ({ ...prev, capitalGainsShort: numericValue }));
+          setIncome({ ...income, capitalGainsShort: numericValue });
           addMessage(`Short-term capital gains: ₹${numericValue.toLocaleString('en-IN')}. Now enter your long-term capital gains amount (or 0 if none).`, 'ai');
           setCurrentStep('capitalLong');
         } else {
@@ -119,7 +119,7 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'capitalLong':
         if (numericValue >= 0) {
-          setIncome(prev => ({ ...prev, capitalGainsLong: numericValue }));
+          setIncome({ ...income, capitalGainsLong: numericValue });
           addMessage(`Long-term capital gains: ₹${numericValue.toLocaleString('en-IN')}. Finally, do you have income from other sources like interest, dividends etc.? Enter the amount (or 0 if none).`, 'ai');
           setCurrentStep('otherIncome');
         } else {
@@ -129,7 +129,7 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'otherIncome':
         if (numericValue >= 0) {
-          setIncome(prev => ({ ...prev, otherSources: numericValue }));
+          setIncome({ ...income, otherSources: numericValue });
           addMessage(`Other income: ₹${numericValue.toLocaleString('en-IN')}. Now let's discuss deductions for the Old Tax Regime. Do you have investments under Section 80C like PPF, ELSS, LIC etc.? Enter the total amount (max ₹1.5 lakh benefit).`, 'ai');
           setCurrentStep('section80C');
         } else {
@@ -139,7 +139,7 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'section80C':
         if (numericValue >= 0) {
-          setDeductions(prev => ({ ...prev, section80C: Math.min(numericValue, 150000) }));
+          setDeductions({ ...deductions, section80C: Math.min(numericValue, 150000) });
           addMessage(`Section 80C investments: ₹${Math.min(numericValue, 150000).toLocaleString('en-IN')}. Do you pay medical insurance premiums? Enter Section 80D amount (max ₹25,000 for regular, ₹50,000 for senior citizens).`, 'ai');
           setCurrentStep('section80D');
         } else {
@@ -150,7 +150,7 @@ export const AIChat: React.FC<AIChatProps> = ({
       case 'section80D':
         if (numericValue >= 0) {
           const maxLimit = age >= 60 ? 50000 : 25000;
-          setDeductions(prev => ({ ...prev, section80D: Math.min(numericValue, maxLimit) }));
+          setDeductions({ ...deductions, section80D: Math.min(numericValue, maxLimit) });
           addMessage(`Medical insurance (80D): ₹${Math.min(numericValue, maxLimit).toLocaleString('en-IN')}. Do you pay house rent and claim HRA? Enter your annual HRA exemption amount (or 0 if not applicable).`, 'ai');
           setCurrentStep('hra');
         } else {
@@ -160,7 +160,7 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'hra':
         if (numericValue >= 0) {
-          setDeductions(prev => ({ ...prev, hra: numericValue }));
+          setDeductions({ ...deductions, hra: numericValue });
           addMessage(`HRA exemption: ₹${numericValue.toLocaleString('en-IN')}. Perfect! I have all the information needed. Let me calculate your tax liability under both Old and New regimes and recommend the best option for you.`, 'ai');
           setCurrentStep('complete');
           setTimeout(() => {

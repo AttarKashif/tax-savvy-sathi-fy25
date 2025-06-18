@@ -170,7 +170,13 @@ export function calculateNewRegimeTax(income: IncomeData, age: number): TaxResul
   };
 }
 
-export function getOptimalRegime(oldRegimeResult: TaxResult, newRegimeResult: TaxResult) {
+export function getOptimalRegime(oldRegimeResult: TaxResult, newRegimeResult: TaxResult): {
+  recommendedRegime: 'old' | 'new';
+  savings: number;
+  percentageSavings: number;
+  oldRegimeTax: number;
+  newRegimeTax: number;
+} {
   const savings = oldRegimeResult.totalTax - newRegimeResult.totalTax;
   const percentageSavings = oldRegimeResult.totalTax > 0 ? (savings / oldRegimeResult.totalTax) * 100 : 0;
   

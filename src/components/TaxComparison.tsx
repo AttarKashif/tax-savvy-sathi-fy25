@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,12 +32,12 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
     {
       regime: 'Old Regime',
       tax: oldRegimeResult.totalTax,
-      recommended: recommendation.recommendedRegime === 'old'
+      fill: recommendation.recommendedRegime === 'old' ? '#22c55e' : '#94a3b8'
     },
     {
       regime: 'New Regime',
       tax: newRegimeResult.totalTax,
-      recommended: recommendation.recommendedRegime === 'new'
+      fill: recommendation.recommendedRegime === 'new' ? '#22c55e' : '#94a3b8'
     }
   ];
 
@@ -101,7 +100,7 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
               <XAxis dataKey="regime" />
               <YAxis tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`} />
               <Tooltip formatter={(value) => [`₹${formatCurrency(Number(value))}`, 'Tax Amount']} />
-              <Bar dataKey="tax" fill={(entry) => entry.recommended ? '#22c55e' : '#94a3b8'} />
+              <Bar dataKey="tax" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
