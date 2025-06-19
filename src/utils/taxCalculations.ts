@@ -1,3 +1,4 @@
+
 // Tax calculation utilities for FY 2024-25 (AY 2025-26)
 
 export interface TaxSlabRate {
@@ -7,8 +8,8 @@ export interface TaxSlabRate {
 }
 
 export interface IncomeData {
-  salary: number;
-  basicSalary: number; // Added separate basic salary
+  salary: number; // Total annual salary including all allowances
+  basicSalary: number; // Basic salary component only (for HRA calculation)
   businessIncome: number;
   capitalGainsShort: number;
   capitalGainsLong: number;
@@ -18,7 +19,7 @@ export interface IncomeData {
 export interface DeductionData {
   section80C: number;
   section80D: number;
-  hra: number;
+  hra: number; // Only applicable to old regime
   lta: number;
   homeLoanInterest: number;
   section80TTA: number;
@@ -116,6 +117,7 @@ export function calculateOldRegimeTax(
   // Standard deduction for salary (₹50,000)
   const standardDeduction = Math.min(income.salary, 50000);
   
+  // All deductions applicable in old regime including HRA
   const totalDeductions = standardDeduction + deductions.section80C + deductions.section80D + 
                          deductions.hra + deductions.lta + deductions.homeLoanInterest + 
                          deductions.section80TTA + deductions.nps + deductions.professionalTax +
@@ -161,8 +163,8 @@ export function calculateNewRegimeTax(income: IncomeData, deductions: DeductionD
   // Standard deduction for salary (₹75,000 in new regime as per Budget 2024)
   const standardDeduction = Math.min(income.salary, 75000);
   
-  // In new regime, only HRA, standard deduction, and a few specific exemptions are allowed
-  const totalDeductions = standardDeduction + deductions.hra + deductions.gratuity + deductions.leaveEncashment;
+  // In new regime, HRA is NOT allowed, only standard deduction and specific exemptions
+  const totalDeductions = standardDeduction + deductions.gratuity + deductions.leaveEncashment;
   const taxableIncome = Math.max(0, grossIncome - totalDeductions);
   
   const taxBeforeRebate = calculateTaxOnSlabs(taxableIncome, newRegimeSlabs);

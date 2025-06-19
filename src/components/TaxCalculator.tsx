@@ -14,8 +14,8 @@ import { DeductionEntry } from './DeductionEntry';
 export const TaxCalculator = () => {
   const [age, setAge] = useState<number>(30);
   const [income, setIncome] = useState<IncomeData>({
-    salary: 0,
-    basicSalary: 0,
+    salary: 0, // Total annual salary including all allowances
+    basicSalary: 0, // Basic salary component only (for HRA calculation)
     businessIncome: 0,
     capitalGainsShort: 0,
     capitalGainsLong: 0,
@@ -25,7 +25,7 @@ export const TaxCalculator = () => {
   const [deductions, setDeductions] = useState<DeductionData>({
     section80C: 0,
     section80D: 0,
-    hra: 0,
+    hra: 0, // Only applicable to old regime
     lta: 0,
     homeLoanInterest: 0,
     section80TTA: 0,
@@ -69,6 +69,10 @@ export const TaxCalculator = () => {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Get personalized tax advice and compare Old vs New tax regimes with our intelligent AI assistant
           </p>
+          <div className="mt-4 text-sm">
+            <span className="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full mr-2">Old Regime Only</span>
+            <span className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full">Both Regimes</span>
+          </div>
         </div>
 
         {/* Main Interface */}
@@ -120,11 +124,12 @@ export const TaxCalculator = () => {
                       <Input
                         id="age"
                         type="number"
-                        value={age === 0 ? '' : age}
+                        value={age || ''}
                         onChange={(e) => setAge(Number(e.target.value) || 0)}
                         min="18"
                         max="100"
                         className="mt-1"
+                        placeholder="Enter your age"
                       />
                     </div>
                   </div>
@@ -141,6 +146,7 @@ export const TaxCalculator = () => {
                 income={income}
                 onCalculate={handleCalculate}
                 hasValidIncome={hasValidIncome}
+                age={age}
               />
             </TabsContent>
 

@@ -29,7 +29,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
   currentDeductions,
   basicSalary = 0 
 }) => {
-  // HRA State
+  // HRA State - Only for Old Regime
   const [hraData, setHraData] = useState<HRACalculationData>({
     basicSalary,
     hraReceived: 0,
@@ -106,7 +106,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
     const newDeductions: DeductionData = {
       section80C: calculations.section80CResult.total,
       section80D: calculations.section80DResult.total,
-      hra: calculations.hraDeduction,
+      hra: calculations.hraDeduction, // HRA only for old regime
       lta: lta,
       homeLoanInterest: calculations.homeLoanDeduction,
       section80TTA: calculations.savingsDeduction,
@@ -155,6 +155,10 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
           Smart Deduction Calculator (FY 2024-25)
         </h2>
         <p className="text-blue-700">Calculate maximum eligible deductions according to Indian Income Tax Act</p>
+        <div className="mt-2 text-sm">
+          <span className="inline-block bg-red-100 text-red-800 px-2 py-1 rounded mr-2">Old Regime Only</span>
+          <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded">Both Regimes</span>
+        </div>
       </div>
 
       <Tabs defaultValue="hra" className="w-full">
@@ -172,13 +176,14 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-purple-600">
                 <TrendingUp className="w-5 h-5" />
-                House Rent Allowance (HRA) - Applicable for Both Regimes
+                House Rent Allowance (HRA) - 
+                <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">Old Regime Only</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-amber-50 p-3 rounded-lg text-sm">
                 <p className="text-amber-800">
-                  <strong>Note:</strong> HRA exemption is available in both Old and New Tax Regimes. 
+                  <strong>Important:</strong> HRA exemption is available ONLY in the Old Tax Regime. 
                   The exemption is minimum of: Actual HRA received, 50%/40% of basic salary, or Rent paid minus 10% of basic salary.
                 </p>
               </div>
@@ -604,11 +609,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-blue-600">Applicable to Both Regimes:</h3>
-                  <div className="flex justify-between">
-                    <span>HRA Exemption:</span>
-                    <span className="font-semibold">{formatCurrency(calculations.hraDeduction)}</span>
-                  </div>
+                  <h3 className="font-semibold text-green-600">Applicable to Both Regimes:</h3>
                   <div className="flex justify-between">
                     <span>Gratuity:</span>
                     <span className="font-semibold">{formatCurrency(gratuity)}</span>
@@ -620,7 +621,11 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 </div>
                 
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-yellow-600">Old Regime Only:</h3>
+                  <h3 className="font-semibold text-red-600">Old Regime Only:</h3>
+                  <div className="flex justify-between">
+                    <span>HRA Exemption:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.hraDeduction)}</span>
+                  </div>
                   <div className="flex justify-between">
                     <span>Section 80C:</span>
                     <span className="font-semibold">{formatCurrency(calculations.section80CResult.total)}</span>
@@ -652,6 +657,13 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <div className="flex justify-between text-lg font-bold text-green-600">
                 <span>Total Deductions:</span>
                 <span>{formatCurrency(totalDeductions)}</span>
+              </div>
+              
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>Note:</strong> In New Tax Regime, only Standard Deduction (₹75,000), Gratuity, and Leave Encashment are allowed.
+                  Total New Regime Deductions: {formatCurrency(gratuity + leaveEncashment)} + Standard Deduction
+                </p>
               </div>
             </CardContent>
           </Card>
