@@ -1,9 +1,12 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TaxResult } from '@/utils/taxCalculations';
-import { CircleCheck } from 'lucide-react';
+import { TaxResult, IncomeData, DeductionData } from '@/utils/taxCalculations';
+import { CircleCheck, FileText } from 'lucide-react';
+import { generateTaxComparisonPDF } from '@/utils/pdfGenerator';
 
 interface TaxComparisonProps {
   oldRegimeResult: TaxResult;
@@ -16,16 +19,38 @@ interface TaxComparisonProps {
     newRegimeTax: number;
   };
   age: number;
+  income: IncomeData;
+  deductions: DeductionData;
 }
 
 export const TaxComparison: React.FC<TaxComparisonProps> = ({
   oldRegimeResult,
   newRegimeResult,
   recommendation,
-  age
+  age,
+  income,
+  deductions
 }) => {
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-IN');
+  };
+
+  const handleGeneratePDF = async () => {
+    const pdfData = {
+      income,
+      deductions,
+      oldRegimeResult,
+      newRegimeResult,
+      recommendation,
+      age
+    };
+    
+    try {
+      await generateTaxComparisonPDF(pdfData);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF report. Please try again.');
+    }
   };
 
   const chartData = [
@@ -56,6 +81,28 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* PDF Generation Section */}
+      <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-purple-800">Download Detailed Report</h3>
+              <p className="text-purple-600 text-sm">
+                Get a comprehensive PDF report with tax calculations, comparisons, and legal tax-saving suggestions
+              </p>
+            </div>
+            <Button 
+              onClick={handleGeneratePDF}
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              Generate PDF Report
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Recommendation Banner */}
       <Card className={`${recommendation.recommendedRegime === 'new' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
         <CardContent className="pt-6">

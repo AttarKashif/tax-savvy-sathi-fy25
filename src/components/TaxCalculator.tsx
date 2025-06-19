@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,8 +14,8 @@ import { DeductionEntry } from './DeductionEntry';
 export const TaxCalculator = () => {
   const [age, setAge] = useState<number>(30);
   const [income, setIncome] = useState<IncomeData>({
-    salary: 0, // Total annual salary including all allowances
-    basicSalary: 0, // Basic salary component only (for HRA calculation)
+    salary: 0,
+    basicSalary: 0,
     businessIncome: 0,
     capitalGainsShort: 0,
     capitalGainsLong: 0,
@@ -25,7 +25,7 @@ export const TaxCalculator = () => {
   const [deductions, setDeductions] = useState<DeductionData>({
     section80C: 0,
     section80D: 0,
-    hra: 0, // Only applicable to old regime
+    hra: 0,
     lta: 0,
     homeLoanInterest: 0,
     section80TTA: 0,
@@ -47,14 +47,27 @@ export const TaxCalculator = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [showResults, setShowResults] = useState(false);
 
+  // Use useCallback to prevent unnecessary re-renders and maintain state
+  const handleIncomeUpdate = useCallback((newIncome: IncomeData) => {
+    setIncome(newIncome);
+  }, []);
+
+  const handleDeductionsUpdate = useCallback((newDeductions: DeductionData) => {
+    setDeductions(newDeductions);
+  }, []);
+
+  const handleAgeUpdate = useCallback((newAge: number) => {
+    setAge(newAge);
+  }, []);
+
   const oldRegimeResult = calculateOldRegimeTax(income, deductions, age);
   const newRegimeResult = calculateNewRegimeTax(income, deductions, age);
   const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
 
-  const handleCalculate = () => {
+  const handleCalculate = useCallback(() => {
     setShowResults(true);
     setActiveTab('results');
-  };
+  }, []);
 
   const hasValidIncome = Object.values(income).some(value => value > 0);
 
@@ -100,11 +113,11 @@ export const TaxCalculator = () => {
             <TabsContent value="chat" className="space-y-6">
               <AIChat
                 income={income}
-                setIncome={setIncome}
+                setIncome={handleIncomeUpdate}
                 deductions={deductions}
-                setDeductions={setDeductions}
+                setDeductions={handleDeductionsUpdate}
                 age={age}
-                setAge={setAge}
+                setAge={handleAgeUpdate}
                 onCalculate={handleCalculate}
               />
             </TabsContent>
@@ -125,7 +138,7 @@ export const TaxCalculator = () => {
                         id="age"
                         type="number"
                         value={age || ''}
-                        onChange={(e) => setAge(Number(e.target.value) || 0)}
+                        onChange={(e) => handleAgeUpdate(Number(e.target.value) || 0)}
                         min="18"
                         max="100"
                         className="mt-1"
@@ -134,7 +147,7 @@ export const TaxCalculator = () => {
                     </div>
                   </div>
                   
-                  <IncomeEntry income={income} setIncome={setIncome} />
+                  <IncomeEntry income={income} setIncome={handleIncomeUpdate} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -142,7 +155,7 @@ export const TaxCalculator = () => {
             <TabsContent value="deductions" className="space-y-6">
               <DeductionEntry 
                 deductions={deductions} 
-                setDeductions={setDeductions}
+                setDeductions={handleDeductionsUpdate}
                 income={income}
                 onCalculate={handleCalculate}
                 hasValidIncome={hasValidIncome}
@@ -157,6 +170,8 @@ export const TaxCalculator = () => {
                   newRegimeResult={newRegimeResult}
                   recommendation={recommendation}
                   age={age}
+                  income={income}
+                  deductions={deductions}
                 />
               )}
             </TabsContent>
