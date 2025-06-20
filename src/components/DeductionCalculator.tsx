@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, Info, TrendingUp, Shield, Heart, GraduationCap, Home, Gift } from 'lucide-react';
+import { Calculator, Info, TrendingUp, Shield, Heart, GraduationCap, Home, Gift, Building, Car } from 'lucide-react';
 import { DeductionData } from '@/utils/taxCalculations';
 import { 
   calculateMaxHRA, 
@@ -82,6 +82,9 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
   const [section80G, setSection80G] = useState(0);
   const [section80GG, setSection80GG] = useState({ rentPaid: 0, totalIncome: 0 });
   const [section80TTA, setSection80TTA] = useState(0);
+  const [section80CCG, setSection80CCG] = useState(0);
+  const [section80CCC, setSection80CCC] = useState(0);
+  const [section80CCD, setSection80CCD] = useState(0);
 
   // Salary Exemptions
   const [lta, setLta] = useState(0);
@@ -164,9 +167,9 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
       section80EEA: calculations.section80EEAResult,
       section80U: calculations.section80UResult,
       section80DDB: calculations.section80DDBResult,
-      section80CCG: 0, // Keep existing fields
-      section80CCC: 0,
-      section80CCD: 0,
+      section80CCG: section80CCG,
+      section80CCC: section80CCC,
+      section80CCD: section80CCD,
       gratuity: calculations.gratuityDeduction,
       leaveEncashment
     };
@@ -178,7 +181,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
     if (hasChanged) {
       onDeductionsUpdate(newDeductions);
     }
-  }, [calculations, lta, professionalTax, leaveEncashment, currentDeductions, onDeductionsUpdate]);
+  }, [calculations, lta, professionalTax, leaveEncashment, section80CCG, section80CCC, section80CCD, currentDeductions, onDeductionsUpdate]);
 
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString('en-IN')}`;
 
@@ -287,7 +290,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   placeholder="Enter LTA amount"
                 />
                 <p className="text-sm text-gray-600 mt-2">
-                  Actual domestic travel expenses
+                  Actual domestic travel expenses, 1 trip per calendar year
                 </p>
               </CardContent>
             </Card>
@@ -333,6 +336,27 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               </CardContent>
             </Card>
 
+            {/* Child Hostel Allowance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-orange-600">Child Hostel - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="childHostel">Number of Children in Hostel (Max 2)</Label>
+                <Input
+                  id="childHostel"
+                  type="number"
+                  value={childHostel || ''}
+                  onChange={(e) => setChildHostel(Math.min(Number(e.target.value) || 0, 2))}
+                  placeholder="Enter number of children"
+                  max="2"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  ₹300/month per child. Exemption: {formatCurrency(calculations.childHostelDeduction)}
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Meal Vouchers */}
             <Card>
               <CardHeader>
@@ -361,7 +385,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
             {/* Section 80C */}
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle className="text-blue-600">Section 80C - Investment Deductions (Max: ₹1.5 Lakh)</CardTitle>
+                <CardTitle className="text-blue-600">Section 80C - Investment Deductions (Max: ₹1.5 Lakh) - Old Regime Only</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -404,11 +428,11 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-600">
                   <Heart className="w-5 h-5" />
-                  Section 80D - Health Insurance
+                  Section 80D - Health Insurance - Old Regime Only
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <Label htmlFor="selfFamily">Self & Family Premium</Label>
                     <Input
@@ -441,7 +465,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   </div>
                 </div>
                 
-                <div className="flex space-x-4">
+                <div className="flex flex-col space-y-2">
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={section80D.isSelfSenior}
@@ -477,7 +501,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-purple-600">
                   <GraduationCap className="w-5 h-5" />
-                  Section 80E - Education Loan
+                  Section 80E - Education Loan - Old Regime Only
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -500,7 +524,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-pink-600">
                   <Gift className="w-5 h-5" />
-                  Section 80G - Donations
+                  Section 80G - Donations - Old Regime Only
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -523,7 +547,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-indigo-600">
                   <Shield className="w-5 h-5" />
-                  Section 80U - Self Disability
+                  Section 80U - Self Disability - Old Regime Only
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -548,64 +572,54 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 </p>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
 
-        <TabsContent value="other-deductions" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Home Loan Interest */}
+            {/* Section 80DD */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-orange-600">Home Loan Interest (Section 24b)</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-indigo-600">
+                  <Shield className="w-5 h-5" />
+                  Section 80DD - Dependent Disability - Old Regime Only
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <Label htmlFor="homeLoan">Annual Interest</Label>
-                <Input
-                  id="homeLoan"
-                  type="number"
-                  value={homeLoanInterest || ''}
-                  onChange={(e) => setHomeLoanInterest(Number(e.target.value) || 0)}
-                  placeholder="Enter home loan interest"
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  Max: ₹2 lakh. Eligible: {formatCurrency(calculations.homeLoanDeduction)}
+              <CardContent className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={section80DD.amount > 0}
+                    onCheckedChange={(checked) => setSection80DD(prev => ({ ...prev, amount: checked ? 1 : 0 }))}
+                  />
+                  <Label>Claim Dependent Disability Deduction</Label>
+                </div>
+                {section80DD.amount > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={section80DD.isSevere}
+                      onCheckedChange={(checked) => setSection80DD(prev => ({ ...prev, isSevere: checked }))}
+                    />
+                    <Label>Severe Disability (80%+)</Label>
+                  </div>
+                )}
+                <p className="text-sm text-gray-600">
+                  Deduction: {formatCurrency(calculations.section80DDResult)}
                 </p>
               </CardContent>
             </Card>
 
-            {/* NPS */}
+            {/* Section 80DDB */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-600">NPS (80CCD-1B)</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-red-600">
+                  <Heart className="w-5 h-5" />
+                  Section 80DDB - Medical Treatment - Old Regime Only
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <Label htmlFor="nps">Additional NPS Contribution</Label>
+                <Label htmlFor="section80DDB">Medical Treatment Expenses</Label>
                 <Input
-                  id="nps"
+                  id="section80DDB"
                   type="number"
-                  value={npsContribution || ''}
-                  onChange={(e) => setNpsContribution(Number(e.target.value) || 0)}
-                  placeholder="Enter NPS contribution"
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  Max: ₹50,000. Eligible: {formatCurrency(calculations.npsDeduction)}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Savings Interest */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-indigo-600">Savings Interest (80TTA/80TTB)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Label htmlFor="savings">Savings Account Interest</Label>
-                <Input
-                  id="savings"
-                  type="number"
-                  value={section80TTA || ''}
-                  onChange={(e) => setSection80TTA(Number(e.target.value) || 0)}
-                  placeholder="Enter savings interest"
+                  value={section80DDB || ''}
+                  onChange={(e) => setSection80DDB(Number(e.target.value) || 0)}
+                  placeholder="Enter medical expenses"
                 />
                 <div className="mt-2">
                   <Label htmlFor="age">Your Age</Label>
@@ -618,7 +632,209 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   />
                 </div>
                 <p className="text-sm text-gray-600 mt-2">
+                  Limit: {formatCurrency(userAge >= 60 ? 100000 : 40000)}. Eligible: {formatCurrency(calculations.section80DDBResult)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Section 80EE */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-orange-600">
+                  <Home className="w-5 h-5" />
+                  Section 80EE - First Home Loan - Old Regime Only
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="section80EE">Home Loan Interest (Additional)</Label>
+                <Input
+                  id="section80EE"
+                  type="number"
+                  value={section80EE || ''}
+                  onChange={(e) => setSection80EE(Number(e.target.value) || 0)}
+                  placeholder="Enter additional home loan interest"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹50,000 (First-time buyers). Eligible: {formatCurrency(calculations.section80EEResult)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Section 80EEA */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-orange-600">
+                  <Home className="w-5 h-5" />
+                  Section 80EEA - Affordable Housing - Old Regime Only
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="section80EEA">Affordable Housing Loan Interest</Label>
+                <Input
+                  id="section80EEA"
+                  type="number"
+                  value={section80EEA || ''}
+                  onChange={(e) => setSection80EEA(Number(e.target.value) || 0)}
+                  placeholder="Enter affordable housing loan interest"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹1.5 lakh (Property ≤₹45 lakh). Eligible: {formatCurrency(calculations.section80EEAResult)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Section 80TTA/TTB */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-indigo-600">Section 80TTA/80TTB - Interest Income - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="savings">Savings/Deposit Interest</Label>
+                <Input
+                  id="savings"
+                  type="number"
+                  value={section80TTA || ''}
+                  onChange={(e) => setSection80TTA(Number(e.target.value) || 0)}
+                  placeholder="Enter savings interest"
+                />
+                <p className="text-sm text-gray-600 mt-2">
                   Limit: {formatCurrency(userAge >= 60 ? 50000 : 10000)}. Eligible: {formatCurrency(calculations.section80TTAResult)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Section 80CCC */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-purple-600">Section 80CCC - Pension Fund - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="section80CCC">Pension Fund Contribution</Label>
+                <Input
+                  id="section80CCC"
+                  type="number"
+                  value={section80CCC || ''}
+                  onChange={(e) => setSection80CCC(Number(e.target.value) || 0)}
+                  placeholder="Enter pension fund contribution"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Part of overall ₹1.5 lakh limit (80C + 80CCC + 80CCD)
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Section 80CCD */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-purple-600">Section 80CCD(1) - Employee NPS - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="section80CCD">Employee NPS Contribution</Label>
+                <Input
+                  id="section80CCD"
+                  type="number"
+                  value={section80CCD || ''}
+                  onChange={(e) => setSection80CCD(Number(e.target.value) || 0)}
+                  placeholder="Enter employee NPS contribution"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Part of overall ₹1.5 lakh limit (80C + 80CCC + 80CCD)
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Section 80CCG */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-blue-600">Section 80CCG - Rajiv Gandhi Equity - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="section80CCG">Rajiv Gandhi Equity Savings Scheme</Label>
+                <Input
+                  id="section80CCG"
+                  type="number"
+                  value={section80CCG || ''}
+                  onChange={(e) => setSection80CCG(Number(e.target.value) || 0)}
+                  placeholder="Enter RGESS investment"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹25,000 (50% of investment, separate from 80C)
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="other-deductions" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Home Loan Interest */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-orange-600">Home Loan Interest (Section 24b) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="homeLoan">Annual Interest</Label>
+                <Input
+                  id="homeLoan"
+                  type="number"
+                  value={homeLoanInterest || ''}
+                  onChange={(e) => setHomeLoanInterest(Number(e.target.value) || 0)}
+                  placeholder="Enter home loan interest"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹2 lakh (self-occupied). Eligible: {formatCurrency(calculations.homeLoanDeduction)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* NPS Additional */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-purple-600">NPS Additional (80CCD-1B) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="nps">Additional NPS Contribution</Label>
+                <Input
+                  id="nps"
+                  type="number"
+                  value={npsContribution || ''}
+                  onChange={(e) => setNpsContribution(Number(e.target.value) || 0)}
+                  placeholder="Enter additional NPS contribution"
+                />
+                <p className="text-sm text-gray-600 mt-2">
+                  Max: ₹50,000 (over and above 80C limit). Eligible: {formatCurrency(calculations.npsDeduction)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Section 80GG */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-teal-600">Section 80GG - Rent (No HRA) - Old Regime Only</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <Label htmlFor="section80GGRent">Rent Paid</Label>
+                  <Input
+                    id="section80GGRent"
+                    type="number"
+                    value={section80GG.rentPaid || ''}
+                    onChange={(e) => setSection80GG(prev => ({ ...prev, rentPaid: Number(e.target.value) || 0 }))}
+                    placeholder="Enter rent paid"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="section80GGIncome">Total Income</Label>
+                  <Input
+                    id="section80GGIncome"
+                    type="number"
+                    value={section80GG.totalIncome || ''}
+                    onChange={(e) => setSection80GG(prev => ({ ...prev, totalIncome: Number(e.target.value) || 0 }))}
+                    placeholder="Enter total income"
+                  />
+                </div>
+                <p className="text-sm text-gray-600">
+                  For those not receiving HRA. Eligible: {formatCurrency(calculations.section80GGResult)}
                 </p>
               </CardContent>
             </Card>
@@ -634,13 +850,13 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <Label htmlFor="gratuitySalary">Last Drawn Salary</Label>
+                  <Label htmlFor="gratuitySalary">Last Drawn Salary (Monthly)</Label>
                   <Input
                     id="gratuitySalary"
                     type="number"
                     value={gratuity.salary || ''}
                     onChange={(e) => setGratuity(prev => ({ ...prev, salary: Number(e.target.value) || 0 }))}
-                    placeholder="Enter salary"
+                    placeholder="Enter monthly salary"
                   />
                 </div>
                 <div>
@@ -650,7 +866,7 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     type="number"
                     value={gratuity.years || ''}
                     onChange={(e) => setGratuity(prev => ({ ...prev, years: Number(e.target.value) || 0 }))}
-                    placeholder="Enter years"
+                    placeholder="Enter years of service"
                   />
                 </div>
                 <div>
@@ -660,10 +876,11 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     type="number"
                     value={gratuity.actual || ''}
                     onChange={(e) => setGratuity(prev => ({ ...prev, actual: Number(e.target.value) || 0 }))}
-                    placeholder="Enter actual amount"
+                    placeholder="Enter actual gratuity amount"
                   />
                 </div>
                 <p className="text-sm text-gray-600">
+                  Formula: 15 days salary × years of service ÷ 26. Max: ₹20 lakh<br/>
                   Exemption: {formatCurrency(calculations.gratuityDeduction)}
                 </p>
               </CardContent>
@@ -675,16 +892,16 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                 <CardTitle className="text-cyan-600">Leave Encashment - Both Regimes</CardTitle>
               </CardHeader>
               <CardContent>
-                <Label htmlFor="leave">Leave Encashment</Label>
+                <Label htmlFor="leave">Leave Encashment Amount</Label>
                 <Input
                   id="leave"
                   type="number"
                   value={leaveEncashment || ''}
                   onChange={(e) => setLeaveEncashment(Number(e.target.value) || 0)}
-                  placeholder="Enter leave encashment"
+                  placeholder="Enter leave encashment amount"
                 />
                 <p className="text-sm text-gray-600 mt-2">
-                  Exempt as per rules
+                  Exempt as per Income Tax rules (conditions apply)
                 </p>
               </CardContent>
             </Card>
@@ -705,11 +922,19 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                   <h3 className="font-semibold text-green-600">Applicable to Both Regimes:</h3>
                   <div className="flex justify-between">
                     <span>Gratuity:</span>
-                    <span className="font-semibold">{formatCurrency(gratuity.salary)}</span>
+                    <span className="font-semibold">{formatCurrency(calculations.gratuityDeduction)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Leave Encashment:</span>
                     <span className="font-semibold">{formatCurrency(leaveEncashment)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Professional Tax:</span>
+                    <span className="font-semibold">{formatCurrency(professionalTax)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Meal Vouchers:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.mealVoucherDeduction)}</span>
                   </div>
                 </div>
                 
@@ -720,6 +945,10 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     <span className="font-semibold">{formatCurrency(calculations.hraDeduction)}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span>LTA:</span>
+                    <span className="font-semibold">{formatCurrency(lta)}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span>Section 80C:</span>
                     <span className="font-semibold">{formatCurrency(calculations.section80CResult.total)}</span>
                   </div>
@@ -728,34 +957,34 @@ export const DeductionCalculator: React.FC<DeductionCalculatorProps> = ({
                     <span className="font-semibold">{formatCurrency(calculations.section80DResult.total)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Professional Tax:</span>
-                    <span className="font-semibold">{formatCurrency(professionalTax)}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span>Home Loan Interest:</span>
                     <span className="font-semibold">{formatCurrency(calculations.homeLoanDeduction)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Education Loan:</span>
-                    <span className="font-semibold">{formatCurrency(section80E)}</span>
+                    <span className="font-semibold">{formatCurrency(calculations.section80EResult)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Other Deductions:</span>
-                    <span className="font-semibold">{formatCurrency(section80G + section80EE + section80EEA + section80U)}</span>
+                    <span>NPS Additional:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.npsDeduction)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Other Section 80:</span>
+                    <span className="font-semibold">{formatCurrency(calculations.section80GResult + calculations.section80EEResult + calculations.section80EEAResult + calculations.section80UResult + calculations.section80DDResult + calculations.section80DDBResult + calculations.section80TTAResult)}</span>
                   </div>
                 </div>
               </div>
               
               <hr className="my-4" />
               <div className="flex justify-between text-lg font-bold text-green-600">
-                <span>Total Deductions:</span>
+                <span>Total Deductions (Old Regime):</span>
                 <span>{formatCurrency(totalDeductions)}</span>
               </div>
               
               <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  <strong>Note:</strong> In New Tax Regime, only Standard Deduction (₹75,000), Gratuity, and Leave Encashment are allowed.
-                  Total New Regime Deductions: {formatCurrency(gratuity + leaveEncashment)} + Standard Deduction
+                  <strong>Note:</strong> In New Tax Regime, only Standard Deduction (₹75,000), Gratuity, Leave Encashment, Professional Tax, and Meal Vouchers are allowed.
+                  Total New Regime Deductions: {formatCurrency(calculations.gratuityDeduction + leaveEncashment + professionalTax + calculations.mealVoucherDeduction)} + Standard Deduction
                 </p>
               </div>
             </CardContent>
