@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +20,7 @@ interface TaxComparisonProps {
   age: number;
   income: IncomeData;
   deductions: DeductionData;
+  taxpayerName: string;
 }
 
 export const TaxComparison: React.FC<TaxComparisonProps> = ({
@@ -29,7 +29,8 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
   recommendation,
   age,
   income,
-  deductions
+  deductions,
+  taxpayerName
 }) => {
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-IN');
@@ -42,7 +43,8 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
       oldRegimeResult,
       newRegimeResult,
       recommendation,
-      age
+      age,
+      taxpayerName
     };
     
     try {
@@ -304,6 +306,7 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
             <div>
               <h4 className="font-semibold mb-3">Taxpayer Details</h4>
               <ul className="space-y-2 text-sm">
+                <li><strong>Name:</strong> {taxpayerName || 'Not provided'}</li>
                 <li><strong>Age:</strong> {age} years</li>
                 <li><strong>Category:</strong> {getAgeCategory(age)}</li>
                 <li><strong>Assessment Year:</strong> 2025-26</li>

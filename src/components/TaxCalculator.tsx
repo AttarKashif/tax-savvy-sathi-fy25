@@ -14,6 +14,7 @@ import { HelpManual } from './HelpManual';
 
 export const TaxCalculator = () => {
   const [age, setAge] = useState<number>(30);
+  const [taxpayerName, setTaxpayerName] = useState<string>('');
   const [income, setIncome] = useState<IncomeData>({
     salary: 0,
     basicSalary: 0,
@@ -48,7 +49,6 @@ export const TaxCalculator = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [showResults, setShowResults] = useState(false);
 
-  // Use useCallback to prevent unnecessary re-renders and maintain state
   const handleIncomeUpdate = useCallback((newIncome: IncomeData) => {
     setIncome(newIncome);
   }, []);
@@ -61,6 +61,10 @@ export const TaxCalculator = () => {
     setAge(newAge);
   }, []);
 
+  const handleTaxpayerNameUpdate = useCallback((newName: string) => {
+    setTaxpayerName(newName);
+  }, []);
+
   const oldRegimeResult = calculateOldRegimeTax(income, deductions, age);
   const newRegimeResult = calculateNewRegimeTax(income, deductions, age);
   const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
@@ -70,7 +74,9 @@ export const TaxCalculator = () => {
     setActiveTab('results');
   }, []);
 
-  const hasValidIncome = Object.values(income).some(value => value > 0);
+  // Calculate total income correctly (excluding basic salary as it's part of annual salary)
+  const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
+  const hasValidIncome = totalIncome > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -93,10 +99,6 @@ export const TaxCalculator = () => {
         <div className="max-w-6xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5 mb-6">
-              <TabsTrigger value="help" className="flex items-center gap-2">
-                <HelpCircle className="w-4 h-4" />
-                Help Manual
-              </TabsTrigger>
               <TabsTrigger value="chat" className="flex items-center gap-2">
                 <Bot className="w-4 h-4" />
                 AI Assistant
@@ -113,11 +115,11 @@ export const TaxCalculator = () => {
                 <ChartBar className="w-4 h-4" />
                 Tax Comparison
               </TabsTrigger>
+              <TabsTrigger value="help" className="flex items-center gap-2">
+                <HelpCircle className="w-4 h-4" />
+                User Manual
+              </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="help" className="space-y-6">
-              <HelpManual />
-            </TabsContent>
 
             <TabsContent value="chat" className="space-y-6">
               <AIChat
@@ -156,7 +158,12 @@ export const TaxCalculator = () => {
                     </div>
                   </div>
                   
-                  <IncomeEntry income={income} setIncome={handleIncomeUpdate} />
+                  <IncomeEntry 
+                    income={income} 
+                    setIncome={handleIncomeUpdate}
+                    taxpayerName={taxpayerName}
+                    setTaxpayerName={handleTaxpayerNameUpdate}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -181,8 +188,13 @@ export const TaxCalculator = () => {
                   age={age}
                   income={income}
                   deductions={deductions}
+                  taxpayerName={taxpayerName}
                 />
               )}
+            </TabsContent>
+
+            <TabsContent value="help" className="space-y-6">
+              <HelpManual />
             </TabsContent>
           </Tabs>
         </div>
