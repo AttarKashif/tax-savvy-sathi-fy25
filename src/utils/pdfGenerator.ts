@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { IncomeData, DeductionData, TaxResult } from './taxCalculations';
 
@@ -47,8 +46,12 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
     let currentY = startY + 8;
     
     rows.forEach((row, rowIndex) => {
-      const fillColor = rowIndex % 2 === 0 ? [248, 250, 252] : [255, 255, 255];
-      pdf.setFillColor(...fillColor);
+      // Fix: Use individual RGB values instead of spread array
+      if (rowIndex % 2 === 0) {
+        pdf.setFillColor(248, 250, 252);
+      } else {
+        pdf.setFillColor(255, 255, 255);
+      }
       pdf.rect(15, currentY, pageWidth - 30, 6, 'F');
       
       row.forEach((cell, i) => {
@@ -97,7 +100,7 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
   yPosition += 35;
 
   // Income Summary Table
-  checkPageBreak(60);
+  checkPageBreak(80);
   pdf.setFontSize(14);
   pdf.setTextColor(0, 0, 0);
   pdf.text('INCOME SUMMARY', 15, yPosition);
@@ -117,7 +120,7 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
   yPosition = createTable(incomeHeaders, incomeRows, yPosition);
 
   // Tax Comparison Table
-  checkPageBreak(80);
+  checkPageBreak(100);
   pdf.setFontSize(14);
   pdf.text('TAX CALCULATION COMPARISON', 15, yPosition);
   yPosition += 8;
@@ -137,22 +140,22 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
 
   yPosition = createTable(comparisonHeaders, comparisonRows, yPosition);
 
-  // Deductions Breakdown (Old Regime)
-  checkPageBreak(60);
+  // Deductions Breakdown Table
+  checkPageBreak(120);
   pdf.setFontSize(14);
   pdf.text('DEDUCTIONS BREAKDOWN (OLD REGIME)', 15, yPosition);
   yPosition += 8;
 
-  const deductionHeaders = ['Section/Type', 'Amount (₹)', 'Limit (₹)'];
+  const deductionHeaders = ['Section/Type', 'Amount (₹)', 'Limit (₹)', 'Regime'];
   const deductionRows = [
-    ['Standard Deduction', '50,000', '50,000'],
-    ['Section 80C', data.deductions.section80C.toLocaleString('en-IN'), '1,50,000'],
-    ['Section 80D (Health Insurance)', data.deductions.section80D.toLocaleString('en-IN'), '25,000-1,00,000'],
-    ['HRA Exemption', data.deductions.hra.toLocaleString('en-IN'), 'As per calculation'],
-    ['Home Loan Interest', data.deductions.homeLoanInterest.toLocaleString('en-IN'), '2,00,000'],
-    ['NPS (80CCD-1B)', data.deductions.nps.toLocaleString('en-IN'), '50,000'],
-    ['Education Loan (80E)', data.deductions.section80E.toLocaleString('en-IN'), 'No Limit'],
-    ['Professional Tax', data.deductions.professionalTax.toLocaleString('en-IN'), '2,500']
+    ['Standard Deduction', '50,000', '50,000', 'Both'],
+    ['Section 80C', data.deductions.section80C.toLocaleString('en-IN'), '1,50,000', 'Old Only'],
+    ['Section 80D', data.deductions.section80D.toLocaleString('en-IN'), '25,000-1,00,000', 'Old Only'],
+    ['HRA Exemption', data.deductions.hra.toLocaleString('en-IN'), 'As per calculation', 'Old Only'],
+    ['Home Loan Interest', data.deductions.homeLoanInterest.toLocaleString('en-IN'), '2,00,000', 'Old Only'],
+    ['NPS (80CCD-1B)', data.deductions.nps.toLocaleString('en-IN'), '50,000', 'Old Only'],
+    ['Education Loan (80E)', data.deductions.section80E.toLocaleString('en-IN'), 'No Limit', 'Old Only'],
+    ['Professional Tax', data.deductions.professionalTax.toLocaleString('en-IN'), '2,500', 'Both']
   ];
 
   yPosition = createTable(deductionHeaders, deductionRows, yPosition);
