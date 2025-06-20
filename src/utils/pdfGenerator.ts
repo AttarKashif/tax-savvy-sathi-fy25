@@ -30,38 +30,67 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
     }
   };
 
+  // Helper function to format numbers without gaps
+  const formatNumber = (value: number): string => {
+    return value.toLocaleString('en-IN', { 
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0 
+    }).replace(/\s/g, '');
+  };
+
   // Helper function to create tables with black and white styling
-  const createTable = (headers: string[], rows: string[][], startY: number) => {
-    const colWidth = (pageWidth - 30) / headers.length;
+  const createTable = (headers: string[], rows: string[][], startY: number, columnWidths?: number[]) => {
+    const totalWidth = pageWidth - 30;
+    const colWidths = columnWidths || headers.map(() => totalWidth / headers.length);
     
     // Draw headers with black background
     pdf.setFillColor(0, 0, 0);
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(10);
-    pdf.rect(15, startY, pageWidth - 30, 8, 'F');
+    pdf.setFont('helvetica', 'bold');
     
+    let xPos = 15;
     headers.forEach((header, i) => {
-      pdf.text(header, 15 + (i * colWidth) + 2, startY + 6);
+      pdf.rect(xPos, startY, colWidths[i], 8, 'F');
+      // Center align text in header
+      const textX = xPos + (colWidths[i] / 2);
+      pdf.text(header, textX, startY + 6, { align: 'center' });
+      xPos += colWidths[i];
     });
     
-    // Draw rows with alternating gray/white background
+    // Draw rows with alternating background
     pdf.setTextColor(0, 0, 0);
     pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
     let currentY = startY + 8;
     
     rows.forEach((row, rowIndex) => {
       if (rowIndex % 2 === 0) {
-        pdf.setFillColor(240, 240, 240);
+        pdf.setFillColor(245, 245, 245);
       } else {
         pdf.setFillColor(255, 255, 255);
       }
-      pdf.rect(15, currentY, pageWidth - 30, 6, 'F');
       
+      xPos = 15;
+      headers.forEach((_, i) => {
+        pdf.rect(xPos, currentY, colWidths[i], 6, 'F');
+        xPos += colWidths[i];
+      });
+      
+      xPos = 15;
       row.forEach((cell, i) => {
-        pdf.text(cell, 15 + (i * colWidth) + 2, currentY + 4);
+        const textX = i === 0 ? xPos + 2 : xPos + (colWidths[i] / 2); // Left align first column, center others
+        const align = i === 0 ? 'left' : 'center';
+        pdf.text(cell, textX, currentY + 4, { align: align as any });
+        xPos += colWidths[i];
       });
       currentY += 6;
     });
+    
+    // Draw table border
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.5);
+    pdf.rect(15, startY, totalWidth, currentY - startY);
     
     return currentY + 5;
   };
@@ -69,16 +98,19 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
   // Title Section
   pdf.setFontSize(20);
   pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('TAX COMPARISON REPORT', pageWidth / 2, yPosition, { align: 'center' });
   yPosition += 8;
 
   pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'normal');
   pdf.text('Financial Year 2024-25 (Assessment Year 2025-26)', pageWidth / 2, yPosition, { align: 'center' });
   yPosition += 15;
 
   // Taxpayer Information Table
   checkPageBreak(40);
   pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('TAXPAYER INFORMATION', 15, yPosition);
   yPosition += 5;
 
@@ -92,28 +124,30 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
     ['Assessment Year', '2025-26']
   ];
 
-  yPosition = createTable(taxpayerHeaders, taxpayerRows, yPosition);
+  yPosition = createTable(taxpayerHeaders, taxpayerRows, yPosition, [60, 120]);
 
   // Recommendation Summary Table
   checkPageBreak(40);
   pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('RECOMMENDATION SUMMARY', 15, yPosition);
   yPosition += 5;
 
   const recommendationHeaders = ['Particulars', 'Details'];
   const recommendationRows = [
     ['Recommended Regime', data.recommendation.recommendedRegime.toUpperCase()],
-    ['Tax Savings', `₹${data.recommendation.savings.toLocaleString('en-IN')}`],
+    ['Tax Savings', `₹${formatNumber(data.recommendation.savings)}`],
     ['Percentage Savings', `${data.recommendation.percentageSavings.toFixed(1)}%`],
-    ['Old Regime Tax', `₹${data.oldRegimeResult.totalTax.toLocaleString('en-IN')}`],
-    ['New Regime Tax', `₹${data.newRegimeResult.totalTax.toLocaleString('en-IN')}`]
+    ['Old Regime Tax', `₹${formatNumber(data.oldRegimeResult.totalTax)}`],
+    ['New Regime Tax', `₹${formatNumber(data.newRegimeResult.totalTax)}`]
   ];
 
-  yPosition = createTable(recommendationHeaders, recommendationRows, yPosition);
+  yPosition = createTable(recommendationHeaders, recommendationRows, yPosition, [80, 100]);
 
   // Income Summary Table
   checkPageBreak(60);
   pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('INCOME SUMMARY', 15, yPosition);
   yPosition += 5;
 
@@ -121,58 +155,60 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
   const totalIncome = data.income.salary + data.income.businessIncome + data.income.capitalGainsShort + data.income.capitalGainsLong + data.income.otherSources;
   
   const incomeRows = [
-    ['Annual Salary', data.income.salary.toLocaleString('en-IN')],
-    ['Business Income', data.income.businessIncome.toLocaleString('en-IN')],
-    ['Short-term Capital Gains', data.income.capitalGainsShort.toLocaleString('en-IN')],
-    ['Long-term Capital Gains', data.income.capitalGainsLong.toLocaleString('en-IN')],
-    ['Other Sources', data.income.otherSources.toLocaleString('en-IN')],
-    ['TOTAL GROSS INCOME', totalIncome.toLocaleString('en-IN')]
+    ['Annual Salary', formatNumber(data.income.salary)],
+    ['Business Income', formatNumber(data.income.businessIncome)],
+    ['Short-term Capital Gains', formatNumber(data.income.capitalGainsShort)],
+    ['Long-term Capital Gains', formatNumber(data.income.capitalGainsLong)],
+    ['Other Sources', formatNumber(data.income.otherSources)],
+    ['TOTAL GROSS INCOME', formatNumber(totalIncome)]
   ];
 
-  yPosition = createTable(incomeHeaders, incomeRows, yPosition);
+  yPosition = createTable(incomeHeaders, incomeRows, yPosition, [100, 80]);
 
   // Tax Calculation Comparison Table
   checkPageBreak(80);
   pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('TAX CALCULATION COMPARISON', 15, yPosition);
   yPosition += 5;
 
   const comparisonHeaders = ['Particulars', 'Old Regime (₹)', 'New Regime (₹)'];
   const comparisonRows = [
-    ['Gross Income', data.oldRegimeResult.grossIncome.toLocaleString('en-IN'), data.newRegimeResult.grossIncome.toLocaleString('en-IN')],
-    ['Total Deductions', data.oldRegimeResult.totalDeductions.toLocaleString('en-IN'), data.newRegimeResult.totalDeductions.toLocaleString('en-IN')],
-    ['Taxable Income', data.oldRegimeResult.taxableIncome.toLocaleString('en-IN'), data.newRegimeResult.taxableIncome.toLocaleString('en-IN')],
-    ['Tax Before Rebate', data.oldRegimeResult.taxBeforeRebate.toLocaleString('en-IN'), data.newRegimeResult.taxBeforeRebate.toLocaleString('en-IN')],
-    ['Section 87A Rebate', data.oldRegimeResult.rebateAmount.toLocaleString('en-IN'), data.newRegimeResult.rebateAmount.toLocaleString('en-IN')],
-    ['Tax After Rebate', data.oldRegimeResult.taxAfterRebate.toLocaleString('en-IN'), data.newRegimeResult.taxAfterRebate.toLocaleString('en-IN')],
-    ['Surcharge', data.oldRegimeResult.surcharge.toLocaleString('en-IN'), data.newRegimeResult.surcharge.toLocaleString('en-IN')],
-    ['Health & Education Cess', data.oldRegimeResult.cess.toLocaleString('en-IN'), data.newRegimeResult.cess.toLocaleString('en-IN')],
-    ['TOTAL TAX LIABILITY', data.oldRegimeResult.totalTax.toLocaleString('en-IN'), data.newRegimeResult.totalTax.toLocaleString('en-IN')]
+    ['Gross Income', formatNumber(data.oldRegimeResult.grossIncome), formatNumber(data.newRegimeResult.grossIncome)],
+    ['Total Deductions', formatNumber(data.oldRegimeResult.totalDeductions), formatNumber(data.newRegimeResult.totalDeductions)],
+    ['Taxable Income', formatNumber(data.oldRegimeResult.taxableIncome), formatNumber(data.newRegimeResult.taxableIncome)],
+    ['Tax Before Rebate', formatNumber(data.oldRegimeResult.taxBeforeRebate), formatNumber(data.newRegimeResult.taxBeforeRebate)],
+    ['Section 87A Rebate', formatNumber(data.oldRegimeResult.rebateAmount), formatNumber(data.newRegimeResult.rebateAmount)],
+    ['Tax After Rebate', formatNumber(data.oldRegimeResult.taxAfterRebate), formatNumber(data.newRegimeResult.taxAfterRebate)],
+    ['Surcharge', formatNumber(data.oldRegimeResult.surcharge), formatNumber(data.newRegimeResult.surcharge)],
+    ['Health & Education Cess', formatNumber(data.oldRegimeResult.cess), formatNumber(data.newRegimeResult.cess)],
+    ['TOTAL TAX LIABILITY', formatNumber(data.oldRegimeResult.totalTax), formatNumber(data.newRegimeResult.totalTax)]
   ];
 
-  yPosition = createTable(comparisonHeaders, comparisonRows, yPosition);
+  yPosition = createTable(comparisonHeaders, comparisonRows, yPosition, [70, 55, 55]);
 
   // Deductions Breakdown Table
-  checkPageBreak(100);
+  checkPageBreak(120);
   pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('DEDUCTIONS BREAKDOWN (OLD REGIME)', 15, yPosition);
   yPosition += 5;
 
   const deductionHeaders = ['Section/Type', 'Amount (₹)', 'Limit (₹)', 'Regime'];
   const deductionRows = [
     ['Standard Deduction', '50,000', '50,000', 'Both'],
-    ['Section 80C', data.deductions.section80C.toLocaleString('en-IN'), '1,50,000', 'Old Only'],
-    ['Section 80D', data.deductions.section80D.toLocaleString('en-IN'), '25,000-1,00,000', 'Old Only'],
-    ['HRA Exemption', data.deductions.hra.toLocaleString('en-IN'), 'As per calculation', 'Old Only'],
-    ['Home Loan Interest', data.deductions.homeLoanInterest.toLocaleString('en-IN'), '2,00,000', 'Old Only'],
-    ['NPS (80CCD-1B)', data.deductions.nps.toLocaleString('en-IN'), '50,000', 'Old Only'],
-    ['Education Loan (80E)', data.deductions.section80E.toLocaleString('en-IN'), 'No Limit', 'Old Only'],
-    ['Section 80G (Donations)', data.deductions.section80G.toLocaleString('en-IN'), 'As per rules', 'Old Only'],
-    ['Section 80TTA', data.deductions.section80TTA.toLocaleString('en-IN'), '10,000', 'Old Only'],
-    ['Professional Tax', data.deductions.professionalTax.toLocaleString('en-IN'), '2,500', 'Both']
+    ['Section 80C', formatNumber(data.deductions.section80C), '1,50,000', 'Old Only'],
+    ['Section 80D', formatNumber(data.deductions.section80D), '25,000-1,00,000', 'Old Only'],
+    ['HRA Exemption', formatNumber(data.deductions.hra), 'As per calculation', 'Old Only'],
+    ['Home Loan Interest', formatNumber(data.deductions.homeLoanInterest), '2,00,000', 'Old Only'],
+    ['NPS (80CCD-1B)', formatNumber(data.deductions.nps), '50,000', 'Old Only'],
+    ['Education Loan (80E)', formatNumber(data.deductions.section80E), 'No Limit', 'Old Only'],
+    ['Section 80G (Donations)', formatNumber(data.deductions.section80G), 'As per rules', 'Old Only'],
+    ['Section 80TTA', formatNumber(data.deductions.section80TTA), '10,000', 'Old Only'],
+    ['Professional Tax', formatNumber(data.deductions.professionalTax), '2,500', 'Both']
   ];
 
-  yPosition = createTable(deductionHeaders, deductionRows, yPosition);
+  yPosition = createTable(deductionHeaders, deductionRows, yPosition, [50, 35, 45, 30]);
 
   // Add new page for effective rates and summary
   pdf.addPage();
@@ -180,24 +216,27 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
 
   // Effective Tax Rate Comparison
   pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('EFFECTIVE TAX RATE COMPARISON', 15, yPosition);
   yPosition += 5;
 
   const rateHeaders = ['Regime', 'Total Tax (₹)', 'Gross Income (₹)', 'Effective Rate (%)'];
   const rateRows = [
-    ['Old Regime', data.oldRegimeResult.totalTax.toLocaleString('en-IN'), data.oldRegimeResult.grossIncome.toLocaleString('en-IN'), data.oldRegimeResult.effectiveRate.toFixed(2)],
-    ['New Regime', data.newRegimeResult.totalTax.toLocaleString('en-IN'), data.newRegimeResult.grossIncome.toLocaleString('en-IN'), data.newRegimeResult.effectiveRate.toFixed(2)]
+    ['Old Regime', formatNumber(data.oldRegimeResult.totalTax), formatNumber(data.oldRegimeResult.grossIncome), data.oldRegimeResult.effectiveRate.toFixed(2)],
+    ['New Regime', formatNumber(data.newRegimeResult.totalTax), formatNumber(data.newRegimeResult.grossIncome), data.newRegimeResult.effectiveRate.toFixed(2)]
   ];
 
-  yPosition = createTable(rateHeaders, rateRows, yPosition);
+  yPosition = createTable(rateHeaders, rateRows, yPosition, [45, 45, 45, 45]);
 
   // Tax Saving Recommendations
   yPosition += 10;
   pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
   pdf.text('TAX SAVING RECOMMENDATIONS', 15, yPosition);
   yPosition += 10;
 
   pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
   const recommendations = [
     '1. SECTION 80C INVESTMENTS (Maximum ₹1.5 Lakh)',
     '   • Public Provident Fund (PPF) - 15-year lock-in, tax-free returns',
@@ -239,8 +278,10 @@ export async function generateTaxComparisonPDF(data: PDFReportData): Promise<voi
   pdf.setFillColor(220, 220, 220);
   pdf.rect(15, yPosition, pageWidth - 30, 25, 'F');
   pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(0, 0, 0);
   pdf.text('DISCLAIMER', pageWidth / 2, yPosition + 6, { align: 'center' });
+  pdf.setFont('helvetica', 'normal');
   pdf.text('This is a calculated estimate based on current tax laws for FY 2024-25.', pageWidth / 2, yPosition + 12, { align: 'center' });
   pdf.text('Please consult a qualified tax professional for final tax planning and compliance.', pageWidth / 2, yPosition + 16, { align: 'center' });
   pdf.text('Tax laws are subject to change. Keep updated with latest amendments.', pageWidth / 2, yPosition + 20, { align: 'center' });

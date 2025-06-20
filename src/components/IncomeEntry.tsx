@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, User } from 'lucide-react';
+import { Upload, FileText, User, Edit3, Lock } from 'lucide-react';
 import { IncomeData } from '@/utils/taxCalculations';
 
 interface IncomeEntryProps {
@@ -20,12 +20,15 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
   taxpayerName, 
   setTaxpayerName 
 }) => {
+  const [isEditMode, setIsEditMode] = useState(true);
+
   const updateIncome = (field: keyof IncomeData, value: number) => {
+    if (!isEditMode) return;
     setIncome({ ...income, [field]: value });
   };
 
   const formatCurrency = (value: number) => {
-    return value.toLocaleString('en-IN');
+    return new Intl.NumberFormat('en-IN').format(value);
   };
 
   const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +44,18 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Edit Mode Toggle */}
+      <div className="flex justify-end">
+        <Button
+          variant={isEditMode ? "destructive" : "outline"}
+          onClick={() => setIsEditMode(!isEditMode)}
+          className="flex items-center gap-2"
+        >
+          {isEditMode ? <Lock className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
+          {isEditMode ? 'Lock Fields' : 'Edit Fields'}
+        </Button>
+      </div>
+
       {/* Taxpayer Information */}
       <Card className="border-blue-200 bg-blue-50">
         <CardHeader>
@@ -59,6 +74,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => setTaxpayerName(e.target.value)}
               placeholder="Enter your full name"
               className="mt-1"
+              disabled={!isEditMode}
             />
           </div>
         </CardContent>
@@ -78,7 +94,12 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               Upload your Form 16, Form 26AS, or salary slips to automatically extract income data
             </p>
             <div className="flex items-center gap-4">
-              <Button variant="outline" className="flex items-center gap-2" onClick={() => document.getElementById('document-upload')?.click()}>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2" 
+                onClick={() => document.getElementById('document-upload')?.click()}
+                disabled={!isEditMode}
+              >
                 <Upload className="w-4 h-4" />
                 Upload Tax Document
               </Button>
@@ -113,9 +134,29 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('salary', Number(e.target.value) || 0)}
               placeholder="Enter your total annual salary"
               className="mt-1"
+              disabled={!isEditMode}
             />
             {income.salary > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.salary)}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="basicSalary">Basic Salary (Annual)</Label>
+            <Input
+              id="basicSalary"
+              type="number"
+              value={income.basicSalary || ''}
+              onChange={(e) => updateIncome('basicSalary', Number(e.target.value) || 0)}
+              placeholder="Enter basic salary for HRA calculation"
+              className="mt-1"
+              disabled={!isEditMode}
+            />
+            <p className="text-xs text-gray-600 mt-1">
+              Required for HRA exemption calculation only
+            </p>
+            {income.basicSalary > 0 && (
+              <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.basicSalary)}</p>
             )}
           </div>
         </CardContent>
@@ -135,6 +176,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('businessIncome', Number(e.target.value) || 0)}
               placeholder="Enter business/professional income"
               className="mt-1"
+              disabled={!isEditMode}
             />
             {income.businessIncome > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.businessIncome)}</p>
@@ -157,6 +199,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('capitalGainsShort', Number(e.target.value) || 0)}
               placeholder="Enter short-term capital gains"
               className="mt-1"
+              disabled={!isEditMode}
             />
             {income.capitalGainsShort > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsShort)}</p>
@@ -172,6 +215,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('capitalGainsLong', Number(e.target.value) || 0)}
               placeholder="Enter long-term capital gains"
               className="mt-1"
+              disabled={!isEditMode}
             />
             {income.capitalGainsLong > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsLong)}</p>
@@ -194,6 +238,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('otherSources', Number(e.target.value) || 0)}
               placeholder="Enter income from other sources"
               className="mt-1"
+              disabled={!isEditMode}
             />
             {income.otherSources > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.otherSources)}</p>
@@ -208,7 +253,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
           ₹{formatCurrency(totalIncome)}
         </p>
         <p className="text-sm text-gray-600 mt-1">
-          Note: Basic salary is included in annual salary and used only for HRA calculation
+          Note: Basic salary is used only for HRA calculation and not added to total income
         </p>
       </div>
     </div>
