@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, User, Edit3, Lock } from 'lucide-react';
+import { Upload, FileText, User } from 'lucide-react';
 import { IncomeData } from '@/utils/taxCalculations';
 
 interface IncomeEntryProps {
@@ -20,10 +20,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
   taxpayerName, 
   setTaxpayerName 
 }) => {
-  const [isEditMode, setIsEditMode] = useState(true);
-
   const updateIncome = (field: keyof IncomeData, value: number) => {
-    if (!isEditMode) return;
     setIncome({ ...income, [field]: value });
   };
 
@@ -44,18 +41,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Edit Mode Toggle */}
-      <div className="flex justify-end">
-        <Button
-          variant={isEditMode ? "destructive" : "outline"}
-          onClick={() => setIsEditMode(!isEditMode)}
-          className="flex items-center gap-2"
-        >
-          {isEditMode ? <Lock className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-          {isEditMode ? 'Lock Fields' : 'Edit Fields'}
-        </Button>
-      </div>
-
       {/* Taxpayer Information */}
       <Card className="border-blue-200 bg-blue-50">
         <CardHeader>
@@ -74,7 +59,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => setTaxpayerName(e.target.value)}
               placeholder="Enter your full name"
               className="mt-1"
-              disabled={!isEditMode}
             />
           </div>
         </CardContent>
@@ -98,7 +82,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
                 variant="outline" 
                 className="flex items-center gap-2" 
                 onClick={() => document.getElementById('document-upload')?.click()}
-                disabled={!isEditMode}
               >
                 <Upload className="w-4 h-4" />
                 Upload Tax Document
@@ -111,9 +94,16 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
                 className="hidden"
               />
             </div>
-            <div className="bg-yellow-50 p-3 rounded-lg">
-              <p className="text-xs text-orange-600 font-medium">
-                ⚠️ OCR Feature Status: Requires backend integration for document processing. Currently showing placeholder functionality.
+            <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+              <h4 className="text-sm font-medium text-red-800 mb-2">Document Scanning Status: Not Available</h4>
+              <p className="text-xs text-red-700 mb-2">
+                <strong>Issue:</strong> OCR (Optical Character Recognition) feature requires backend integration for document processing.
+              </p>
+              <p className="text-xs text-red-700 mb-2">
+                <strong>What's needed:</strong> A backend service with OCR capabilities (like Google Cloud Vision API, AWS Textract, or Azure Computer Vision) to extract text from uploaded documents.
+              </p>
+              <p className="text-xs text-red-700">
+                <strong>Current status:</strong> Frontend-only implementation - can accept file uploads but cannot process them.
               </p>
             </div>
           </div>
@@ -134,7 +124,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('salary', Number(e.target.value) || 0)}
               placeholder="Enter your total annual salary"
               className="mt-1"
-              disabled={!isEditMode}
             />
             {income.salary > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.salary)}</p>
@@ -150,10 +139,9 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('basicSalary', Number(e.target.value) || 0)}
               placeholder="Enter basic salary for HRA calculation"
               className="mt-1"
-              disabled={!isEditMode}
             />
             <p className="text-xs text-gray-600 mt-1">
-              Required for HRA exemption calculation only
+              Required for HRA exemption calculation only (not added to total income)
             </p>
             {income.basicSalary > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.basicSalary)}</p>
@@ -176,7 +164,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('businessIncome', Number(e.target.value) || 0)}
               placeholder="Enter business/professional income"
               className="mt-1"
-              disabled={!isEditMode}
             />
             {income.businessIncome > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.businessIncome)}</p>
@@ -199,7 +186,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('capitalGainsShort', Number(e.target.value) || 0)}
               placeholder="Enter short-term capital gains"
               className="mt-1"
-              disabled={!isEditMode}
             />
             {income.capitalGainsShort > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsShort)}</p>
@@ -215,9 +201,8 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('capitalGainsLong', Number(e.target.value) || 0)}
               placeholder="Enter long-term capital gains"
               className="mt-1"
-              disabled={!isEditMode}
             />
-            {income.capitalGainsLong > 0 && (
+            {income.capitalLong > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsLong)}</p>
             )}
           </div>
@@ -238,7 +223,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('otherSources', Number(e.target.value) || 0)}
               placeholder="Enter income from other sources"
               className="mt-1"
-              disabled={!isEditMode}
             />
             {income.otherSources > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.otherSources)}</p>
