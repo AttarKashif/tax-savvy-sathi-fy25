@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText } from 'lucide-react';
+import { Upload, FileText, HelpCircle } from 'lucide-react';
 import { IncomeData } from '@/utils/taxCalculations';
 
 interface IncomeEntryProps {
@@ -15,10 +15,6 @@ interface IncomeEntryProps {
 export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) => {
   const updateIncome = (field: keyof IncomeData, value: number) => {
     const newIncome = { ...income, [field]: value };
-    // Auto-calculate basic salary as 40% of annual salary (common practice)
-    if (field === 'salary') {
-      newIncome.basicSalary = Math.round(value * 0.4);
-    }
     setIncome(newIncome);
   };
 
@@ -29,21 +25,20 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
   const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // This is a placeholder for document scanning functionality
-      // In a real implementation, you would send the file to an OCR service
       console.log('Document uploaded:', file.name);
-      alert('Document scanning feature will be implemented soon. This will automatically extract data from Form 16, Form 26AS, and other tax documents.');
+      // TODO: Implement OCR scanning for Form 16, Form 26AS, etc.
+      alert('Document scanning feature is under development. OCR integration for Form 16, Form 26AS, and salary slips will be available soon.');
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Document Upload Section */}
-      <Card>
+      <Card className="border-purple-200 bg-purple-50">
         <CardHeader>
           <CardTitle className="text-lg text-purple-600 flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Document Scanner (Coming Soon)
+            Document Scanner
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -64,9 +59,11 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
                 className="hidden"
               />
             </div>
-            <p className="text-xs text-blue-600">
-              Supported formats: PDF, JPG, PNG. Supports Form 16, Form 26AS, ITR forms, and salary slips.
-            </p>
+            <div className="bg-yellow-50 p-3 rounded-lg">
+              <p className="text-xs text-orange-600 font-medium">
+                ⚠️ OCR Feature Status: Currently under development. Supports Form 16, Form 26AS, ITR forms, and salary slips (PDF, JPG, PNG formats).
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -77,7 +74,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="salary">Annual Salary (including all allowances)</Label>
+            <Label htmlFor="salary">Annual Salary (Total CTC)</Label>
             <Input
               id="salary"
               type="number"
@@ -87,12 +84,22 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome }) =
               className="mt-1"
             />
             {income.salary > 0 && (
-              <div className="mt-1 space-y-1">
-                <p className="text-sm text-gray-600">₹{formatCurrency(income.salary)}</p>
-                <p className="text-xs text-blue-600">
-                  Basic salary estimated as ₹{formatCurrency(income.basicSalary)} (40% of annual salary)
-                </p>
-              </div>
+              <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.salary)}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="basicSalary">Basic Salary (Monthly × 12)</Label>
+            <Input
+              id="basicSalary"
+              type="number"
+              value={income.basicSalary || ''}
+              onChange={(e) => updateIncome('basicSalary', Number(e.target.value) || 0)}
+              placeholder="Enter your annual basic salary"
+              className="mt-1"
+            />
+            {income.basicSalary > 0 && (
+              <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.basicSalary)}</p>
             )}
           </div>
         </CardContent>

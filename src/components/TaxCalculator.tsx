@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, Bot, ChartBar } from 'lucide-react';
+import { Calculator, Bot, ChartBar, HelpCircle } from 'lucide-react';
 import { IncomeData, DeductionData, calculateOldRegimeTax, calculateNewRegimeTax, getOptimalRegime } from '@/utils/taxCalculations';
 import { AIChat } from './AIChat';
 import { TaxComparison } from './TaxComparison';
 import { IncomeEntry } from './IncomeEntry';
 import { DeductionEntry } from './DeductionEntry';
+import { HelpManual } from './HelpManual';
 
 export const TaxCalculator = () => {
   const [age, setAge] = useState<number>(30);
@@ -91,7 +92,11 @@ export const TaxCalculator = () => {
         {/* Main Interface */}
         <div className="max-w-6xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsList className="grid w-full grid-cols-5 mb-6">
+              <TabsTrigger value="help" className="flex items-center gap-2">
+                <HelpCircle className="w-4 h-4" />
+                Help Manual
+              </TabsTrigger>
               <TabsTrigger value="chat" className="flex items-center gap-2">
                 <Bot className="w-4 h-4" />
                 AI Assistant
@@ -109,6 +114,10 @@ export const TaxCalculator = () => {
                 Tax Comparison
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="help" className="space-y-6">
+              <HelpManual />
+            </TabsContent>
 
             <TabsContent value="chat" className="space-y-6">
               <AIChat
