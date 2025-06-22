@@ -70,11 +70,11 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
       const match = text.match(pattern);
       if (match) {
         if (key === 'taxpayerName') {
-          extractedData[key as keyof ExtractedData] = match[1].trim();
+          extractedData.taxpayerName = match[1].trim();
         } else {
           const value = parseFloat(match[1].replace(/,/g, ''));
           if (!isNaN(value)) {
-            extractedData[key as keyof ExtractedData] = value;
+            (extractedData as any)[key] = value;
           }
         }
       }
