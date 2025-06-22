@@ -124,6 +124,12 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('salary', Number(e.target.value) || 0)}
               placeholder="Enter your total annual salary"
               className="mt-1"
+              onWheel={(e) => e.currentTarget.blur()}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                }
+              }}
             />
             {income.salary > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.salary)}</p>
@@ -139,6 +145,12 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('basicSalary', Number(e.target.value) || 0)}
               placeholder="Enter basic salary for HRA calculation"
               className="mt-1"
+              onWheel={(e) => e.currentTarget.blur()}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                }
+              }}
             />
             <p className="text-xs text-gray-600 mt-1">
               Required for HRA exemption calculation only (not added to total income)
@@ -164,6 +176,12 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('businessIncome', Number(e.target.value) || 0)}
               placeholder="Enter business/professional income"
               className="mt-1"
+              onWheel={(e) => e.currentTarget.blur()}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                }
+              }}
             />
             {income.businessIncome > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.businessIncome)}</p>
@@ -186,6 +204,12 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('capitalGainsShort', Number(e.target.value) || 0)}
               placeholder="Enter short-term capital gains"
               className="mt-1"
+              onWheel={(e) => e.currentTarget.blur()}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                }
+              }}
             />
             {income.capitalGainsShort > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsShort)}</p>
@@ -201,8 +225,14 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('capitalGainsLong', Number(e.target.value) || 0)}
               placeholder="Enter long-term capital gains"
               className="mt-1"
+              onWheel={(e) => e.currentTarget.blur()}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                }
+              }}
             />
-            {income.capitalLong > 0 && (
+            {income.capitalGainsLong > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsLong)}</p>
             )}
           </div>
@@ -223,6 +253,12 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               onChange={(e) => updateIncome('otherSources', Number(e.target.value) || 0)}
               placeholder="Enter income from other sources"
               className="mt-1"
+              onWheel={(e) => e.currentTarget.blur()}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                }
+              }}
             />
             {income.otherSources > 0 && (
               <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.otherSources)}</p>
