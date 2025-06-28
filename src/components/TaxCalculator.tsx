@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,9 +12,12 @@ import { DeductionEntry } from './DeductionEntry';
 import { HelpManual } from './HelpManual';
 import { TaxLibrary } from './TaxLibrary';
 import { useAuth } from '@/hooks/useAuth';
-
 export const TaxCalculator = () => {
-  const { user, profile, signOut } = useAuth();
+  const {
+    user,
+    profile,
+    signOut
+  } = useAuth();
   const [age, setAge] = useState<number>(30);
   const [taxpayerName, setTaxpayerName] = useState<string>('');
   const [income, setIncome] = useState<IncomeData>({
@@ -26,7 +28,6 @@ export const TaxCalculator = () => {
     capitalGainsLong: 0,
     otherSources: 0
   });
-  
   const [deductions, setDeductions] = useState<DeductionData>({
     section80C: 0,
     section80D: 0,
@@ -48,40 +49,30 @@ export const TaxCalculator = () => {
     gratuity: 0,
     leaveEncashment: 0
   });
-
   const [activeTab, setActiveTab] = useState('income');
   const [showResults, setShowResults] = useState(false);
-
   const handleIncomeUpdate = useCallback((newIncome: IncomeData) => {
     setIncome(newIncome);
   }, []);
-
   const handleDeductionsUpdate = useCallback((newDeductions: DeductionData) => {
     setDeductions(newDeductions);
   }, []);
-
   const handleAgeUpdate = useCallback((newAge: number) => {
     setAge(newAge);
   }, []);
-
   const handleTaxpayerNameUpdate = useCallback((newName: string) => {
     setTaxpayerName(newName);
   }, []);
-
   const oldRegimeResult = calculateOldRegimeTax(income, deductions, age);
   const newRegimeResult = calculateNewRegimeTax(income, deductions, age);
   const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
-
   const handleCalculate = useCallback(() => {
     setShowResults(true);
     setActiveTab('results');
   }, []);
-
   const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
   const hasValidIncome = totalIncome > 0;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Modern Header */}
       <div className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-xl">
         <div className="container mx-auto px-6 py-4">
@@ -101,12 +92,7 @@ export const TaxCalculator = () => {
                 <User className="w-4 h-4" />
                 <span className="text-sm font-medium">{profile?.full_name || user?.email}</span>
               </div>
-              <Button
-                onClick={signOut}
-                variant="ghost"
-                size="sm"
-                className="text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-full px-4 py-2 transition-all duration-200"
-              >
+              <Button onClick={signOut} variant="ghost" size="sm" className="text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-full px-4 py-2 transition-all duration-200">
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
               </Button>
@@ -119,32 +105,19 @@ export const TaxCalculator = () => {
         <div className="max-w-7xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
-              <TabsTrigger 
-                value="income" 
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-slate-400 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-700/50"
-              >
+              <TabsTrigger value="income" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
                 <Calculator className="w-4 h-4" />
                 Income Entry
               </TabsTrigger>
-              <TabsTrigger 
-                value="deductions" 
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-slate-400 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-700/50"
-              >
+              <TabsTrigger value="deductions" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
                 <Calculator className="w-4 h-4" />
                 Deductions
               </TabsTrigger>
-              <TabsTrigger 
-                value="results" 
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-slate-400 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-700/50" 
-                disabled={!hasValidIncome}
-              >
+              <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
                 <ChartBar className="w-4 h-4" />
                 Tax Comparison
               </TabsTrigger>
-              <TabsTrigger 
-                value="library" 
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-slate-400 rounded-xl transition-all duration-200 hover:text-white hover:bg-slate-700/50"
-              >
+              <TabsTrigger value="library" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
                 <Library className="w-4 h-4" />
                 Library
               </TabsTrigger>
@@ -164,52 +137,21 @@ export const TaxCalculator = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="age" className="text-slate-300 font-medium">Age</Label>
-                      <Input
-                        id="age"
-                        type="number"
-                        value={age || ''}
-                        onChange={(e) => handleAgeUpdate(Number(e.target.value) || 0)}
-                        min="18"
-                        max="100"
-                        className="bg-slate-700/50 border-slate-600/50 text-white rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
-                        placeholder="Enter your age"
-                      />
+                      <Input id="age" type="number" value={age || ''} onChange={e => handleAgeUpdate(Number(e.target.value) || 0)} min="18" max="100" className="bg-slate-700/50 border-slate-600/50 text-white rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="Enter your age" />
                     </div>
                   </div>
                   
-                  <IncomeEntry 
-                    income={income} 
-                    setIncome={handleIncomeUpdate}
-                    taxpayerName={taxpayerName}
-                    setTaxpayerName={handleTaxpayerNameUpdate}
-                  />
+                  <IncomeEntry income={income} setIncome={handleIncomeUpdate} taxpayerName={taxpayerName} setTaxpayerName={handleTaxpayerNameUpdate} />
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="deductions" className="space-y-6">
-              <DeductionEntry 
-                deductions={deductions} 
-                setDeductions={handleDeductionsUpdate}
-                income={income}
-                onCalculate={handleCalculate}
-                hasValidIncome={hasValidIncome}
-                age={age}
-              />
+              <DeductionEntry deductions={deductions} setDeductions={handleDeductionsUpdate} income={income} onCalculate={handleCalculate} hasValidIncome={hasValidIncome} age={age} />
             </TabsContent>
 
             <TabsContent value="results" className="space-y-6">
-              {showResults && hasValidIncome && (
-                <TaxComparison
-                  oldRegimeResult={oldRegimeResult}
-                  newRegimeResult={newRegimeResult}
-                  recommendation={recommendation}
-                  age={age}
-                  income={income}
-                  deductions={deductions}
-                  taxpayerName={taxpayerName}
-                />
-              )}
+              {showResults && hasValidIncome && <TaxComparison oldRegimeResult={oldRegimeResult} newRegimeResult={newRegimeResult} recommendation={recommendation} age={age} income={income} deductions={deductions} taxpayerName={taxpayerName} />}
             </TabsContent>
 
             <TabsContent value="library" className="space-y-6">
@@ -218,6 +160,5 @@ export const TaxCalculator = () => {
           </Tabs>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
