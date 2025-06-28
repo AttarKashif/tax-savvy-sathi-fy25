@@ -4,15 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, Bot, ChartBar, HelpCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calculator, Bot, ChartBar, HelpCircle, LogOut, User } from 'lucide-react';
 import { IncomeData, DeductionData, calculateOldRegimeTax, calculateNewRegimeTax, getOptimalRegime } from '@/utils/taxCalculations';
 import { AIChat } from './AIChat';
 import { TaxComparison } from './TaxComparison';
 import { IncomeEntry } from './IncomeEntry';
 import { DeductionEntry } from './DeductionEntry';
 import { HelpManual } from './HelpManual';
+import { useAuth } from '@/hooks/useAuth';
 
 export const TaxCalculator = () => {
+  const { user, profile, signOut } = useAuth();
   const [age, setAge] = useState<number>(30);
   const [taxpayerName, setTaxpayerName] = useState<string>('');
   const [income, setIncome] = useState<IncomeData>({
@@ -74,48 +77,81 @@ export const TaxCalculator = () => {
     setActiveTab('results');
   }, []);
 
-  // Calculate total income correctly (excluding basic salary as it's part of annual salary)
   const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
   const hasValidIncome = totalIncome > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            AI Tax Calculator FY 2024-25
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Get personalized tax advice and compare Old vs New tax regimes with our intelligent AI assistant
-          </p>
-          <div className="mt-4 text-sm">
-            <span className="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full mr-2">Old Regime Only</span>
-            <span className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full">Both Regimes</span>
+    <div className="min-h-screen bg-[#0A0A0A]">
+      {/* Header */}
+      <div className="border-b border-[#222222] bg-[#111111]">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <Calculator className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-white">Tax Calculator</h1>
+                <p className="text-sm text-gray-400">FY 2024-25</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-gray-300">
+                <User className="w-4 h-4" />
+                <span className="text-sm">{profile?.full_name || user?.email}</span>
+              </div>
+              <Button
+                onClick={signOut}
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white hover:bg-[#1A1A1A]"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Main Interface */}
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-6">
-              <TabsTrigger value="chat" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-5 mb-6 bg-[#111111] border border-[#222222]">
+              <TabsTrigger 
+                value="chat" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#1A1A1A] data-[state=active]:text-white text-gray-400"
+              >
                 <Bot className="w-4 h-4" />
                 AI Assistant
               </TabsTrigger>
-              <TabsTrigger value="income" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="income" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#1A1A1A] data-[state=active]:text-white text-gray-400"
+              >
                 <Calculator className="w-4 h-4" />
                 Income Entry
               </TabsTrigger>
-              <TabsTrigger value="deductions" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="deductions" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#1A1A1A] data-[state=active]:text-white text-gray-400"
+              >
                 <Calculator className="w-4 h-4" />
                 Deductions
               </TabsTrigger>
-              <TabsTrigger value="results" className="flex items-center gap-2" disabled={!hasValidIncome}>
+              <TabsTrigger 
+                value="results" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#1A1A1A] data-[state=active]:text-white text-gray-400" 
+                disabled={!hasValidIncome}
+              >
                 <ChartBar className="w-4 h-4" />
                 Tax Comparison
               </TabsTrigger>
-              <TabsTrigger value="help" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="help" 
+                className="flex items-center gap-2 data-[state=active]:bg-[#1A1A1A] data-[state=active]:text-white text-gray-400"
+              >
                 <HelpCircle className="w-4 h-4" />
                 User Manual
               </TabsTrigger>
@@ -134,17 +170,17 @@ export const TaxCalculator = () => {
             </TabsContent>
 
             <TabsContent value="income" className="space-y-6">
-              <Card>
+              <Card className="bg-[#111111] border-[#222222]">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5 text-blue-600" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Calculator className="w-5 h-5 text-blue-500" />
                     Income Details
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="age">Age</Label>
+                      <Label htmlFor="age" className="text-gray-300">Age</Label>
                       <Input
                         id="age"
                         type="number"
@@ -152,7 +188,7 @@ export const TaxCalculator = () => {
                         onChange={(e) => handleAgeUpdate(Number(e.target.value) || 0)}
                         min="18"
                         max="100"
-                        className="mt-1"
+                        className="mt-1 bg-[#1A1A1A] border-[#333333] text-white focus:border-blue-500"
                         placeholder="Enter your age"
                       />
                     </div>

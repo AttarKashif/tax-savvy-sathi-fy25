@@ -9,7 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          is_approved: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          is_approved?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_approved?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tax_calculations: {
+        Row: {
+          age: number | null
+          created_at: string | null
+          deductions_data: Json
+          id: string
+          income_data: Json
+          new_regime_tax: number | null
+          old_regime_tax: number | null
+          recommended_regime: string | null
+          taxpayer_name: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string | null
+          deductions_data: Json
+          id?: string
+          income_data: Json
+          new_regime_tax?: number | null
+          old_regime_tax?: number | null
+          recommended_regime?: string | null
+          taxpayer_name?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string | null
+          deductions_data?: Json
+          id?: string
+          income_data?: Json
+          new_regime_tax?: number | null
+          old_regime_tax?: number | null
+          recommended_regime?: string | null
+          taxpayer_name?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
