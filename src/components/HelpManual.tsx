@@ -3,136 +3,115 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Calculator, FileText, Upload, HelpCircle } from 'lucide-react';
+import { BookOpen, Calculator, FileText, HelpCircle, Info, AlertCircle } from 'lucide-react';
 
 export const HelpManual = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4">User Manual & Help Guide</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Complete guide to using the AI Tax Calculator for FY 2024-25. Learn how to maximize your tax savings legally.
+        <h1 className="text-3xl font-bold text-white mb-4">Complete Tax Guide & Help</h1>
+        <p className="text-slate-400 max-w-2xl mx-auto">
+          Everything you need to know about tax calculation, deductions, and maximizing your savings for FY 2024-25.
         </p>
       </div>
 
       <Tabs defaultValue="getting-started" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
-          <TabsTrigger value="income-entry">Income Entry</TabsTrigger>
-          <TabsTrigger value="deductions">Deductions</TabsTrigger>
-          <TabsTrigger value="comparison">Tax Comparison</TabsTrigger>
-          <TabsTrigger value="tips">Tax Tips</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1">
+          <TabsTrigger value="getting-started" className="data-[state=active]:bg-blue-500 rounded-xl text-slate-300 data-[state=active]:text-white">Quick Start</TabsTrigger>
+          <TabsTrigger value="income-guide" className="data-[state=active]:bg-blue-500 rounded-xl text-slate-300 data-[state=active]:text-white">Income Guide</TabsTrigger>
+          <TabsTrigger value="deductions" className="data-[state=active]:bg-blue-500 rounded-xl text-slate-300 data-[state=active]:text-white">Deductions</TabsTrigger>
+          <TabsTrigger value="tax-regimes" className="data-[state=active]:bg-blue-500 rounded-xl text-slate-300 data-[state=active]:text-white">Tax Regimes</TabsTrigger>
+          <TabsTrigger value="faq" className="data-[state=active]:bg-blue-500 rounded-xl text-slate-300 data-[state=active]:text-white">FAQ</TabsTrigger>
+          <TabsTrigger value="tips" className="data-[state=active]:bg-blue-500 rounded-xl text-slate-300 data-[state=active]:text-white">Pro Tips</TabsTrigger>
         </TabsList>
 
         <TabsContent value="getting-started" className="space-y-6">
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <BookOpen className="w-5 h-5" />
                 How to Use This Calculator
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-800 mb-2">Step 1: Choose Your Path</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• <strong>AI Assistant:</strong> Chat with AI for guided help</li>
-                    <li>• <strong>Manual Entry:</strong> Fill forms yourself</li>
-                    <li>• <strong>Document Upload:</strong> Scan tax documents</li>
+                <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
+                  <h3 className="font-semibold text-blue-400 mb-2">Step 1: Enter Personal Info</h3>
+                  <ul className="text-sm space-y-1 text-slate-300">
+                    <li>• Enter your age (affects tax slabs)</li>
+                    <li>• Add your name for reports</li>
+                    <li>• Age determines your tax category</li>
                   </ul>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-green-800 mb-2">Step 2: Enter Your Data</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Income from all sources</li>
-                    <li>• Your age (affects tax slabs)</li>
-                    <li>• All eligible deductions</li>
+                <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20">
+                  <h3 className="font-semibold text-green-400 mb-2">Step 2: Input All Income</h3>
+                  <ul className="text-sm space-y-1 text-slate-300">
+                    <li>• Annual salary (total CTC)</li>
+                    <li>• Basic salary (for HRA calc)</li>
+                    <li>• Business/other income</li>
                   </ul>
                 </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-purple-800 mb-2">Step 3: Review Deductions</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Section 80C investments</li>
-                    <li>• Health insurance premiums</li>
+                <div className="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20">
+                  <h3 className="font-semibold text-purple-400 mb-2">Step 3: Add Deductions</h3>
+                  <ul className="text-sm space-y-1 text-slate-300">
+                    <li>• 80C investments</li>
+                    <li>• Health insurance</li>
                     <li>• Home loan interest</li>
-                    <li>• Other eligible deductions</li>
                   </ul>
                 </div>
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-orange-800 mb-2">Step 4: Compare & Save</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Old vs New regime comparison</li>
-                    <li>• Download detailed PDF report</li>
-                    <li>• Legal tax-saving suggestions</li>
+                <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20">
+                  <h3 className="font-semibold text-orange-400 mb-2">Step 4: Compare & Save</h3>
+                  <ul className="text-sm space-y-1 text-slate-300">
+                    <li>• View regime comparison</li>
+                    <li>• Download PDF report</li>
+                    <li>• Save to library</li>
                   </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Important Notes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="bg-red-50 p-3 rounded-lg">
-                  <p className="text-red-800 text-sm">
-                    <strong>⚠️ Tax Regime Choice:</strong> Most deductions are only available in the Old Tax Regime. 
-                    New regime offers higher standard deduction but fewer deduction options.
-                  </p>
-                </div>
-                <div className="bg-yellow-50 p-3 rounded-lg">
-                  <p className="text-yellow-800 text-sm">
-                    <strong>💡 Annual Choice:</strong> You can switch between tax regimes every year based on your situation.
-                  </p>
-                </div>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <p className="text-blue-800 text-sm">
-                    <strong>📋 Documentation:</strong> Keep all investment proofs, rent receipts, and medical bills for IT department verification.
-                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="income-entry" className="space-y-6">
-          <Card>
+        <TabsContent value="income-guide" className="space-y-6">
+          <Card className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <Calculator className="w-5 h-5" />
-                Income Entry Guide
+                Complete Income Entry Guide
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Salary Income</h3>
-                  <ul className="text-sm space-y-1 ml-4">
-                    <li>• <strong>Annual Salary:</strong> Total CTC including all allowances</li>
-                    <li>• <strong>Basic Salary:</strong> Basic pay component only (for HRA calculation)</li>
-                    <li>• These are independent - enter actual amounts from your salary slip</li>
-                  </ul>
+                <div className="bg-slate-700/30 p-4 rounded-xl">
+                  <h3 className="font-semibold mb-3 text-white">💰 Salary Income</h3>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <p><strong className="text-white">Annual Salary:</strong> Your complete Cost to Company (CTC) including all allowances, bonuses, and benefits</p>
+                    <p><strong className="text-white">Basic Salary:</strong> Only the basic pay component from your salary slip (used for HRA calculation)</p>
+                    <p><strong className="text-blue-400">Note:</strong> These are independent fields - enter actual amounts from your payslip</p>
+                  </div>
                 </div>
                 
-                <div>
-                  <h3 className="font-semibold mb-2">Document Scanning</h3>
-                  <ul className="text-sm space-y-1 ml-4">
-                    <li>• Upload Form 16, Form 26AS, salary slips</li>
-                    <li>• Supported formats: PDF, JPG, PNG</li>
-                    <li>• OCR will auto-fill income details (feature under development)</li>
-                  </ul>
+                <div className="bg-slate-700/30 p-4 rounded-xl">
+                  <h3 className="font-semibold mb-3 text-white">🏢 Business Income</h3>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <p><strong className="text-white">Business/Professional Income:</strong> Net profit from business, freelancing, or professional services</p>
+                    <p><strong className="text-blue-400">Note:</strong> Enter profit after business expenses, not gross revenue</p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="font-semibold mb-2">Other Income Sources</h3>
-                  <ul className="text-sm space-y-1 ml-4">
-                    <li>• <strong>Business Income:</strong> Net profit from business/profession</li>
-                    <li>• <strong>Capital Gains:</strong> Profit from sale of assets</li>
-                    <li>• <strong>Other Sources:</strong> Interest, dividends, rent income</li>
-                  </ul>
+                <div className="bg-slate-700/30 p-4 rounded-xl">
+                  <h3 className="font-semibold mb-3 text-white">📈 Capital Gains</h3>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <p><strong className="text-white">Short-term:</strong> Profit from assets held for less than 1 year (stocks, mutual funds)</p>
+                    <p><strong className="text-white">Long-term:</strong> Profit from assets held for more than 1 year</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-700/30 p-4 rounded-xl">
+                  <h3 className="font-semibold mb-3 text-white">💳 Other Sources</h3>
+                  <div className="space-y-2 text-sm text-slate-300">
+                    <p><strong className="text-white">Includes:</strong> Interest from savings/FD, dividends, rental income, lottery winnings</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -140,146 +119,191 @@ export const HelpManual = () => {
         </TabsContent>
 
         <TabsContent value="deductions" className="space-y-6">
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Complete Deductions Guide</CardTitle>
+              <CardTitle className="text-white">Deductions by Sections</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold text-blue-600 mb-3">Section 80C (₹1.5 Lakh Limit)</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• PPF, EPF contributions</li>
-                    <li>• ELSS mutual funds</li>
-                    <li>• Life insurance premiums</li>
-                    <li>• Home loan principal</li>
-                    <li>• Children's tuition fees</li>
-                    <li>• NSC, tax-saver FDs</li>
-                  </ul>
+                <div className="space-y-4">
+                  <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
+                    <h3 className="font-semibold text-blue-400 mb-3">Section 80C (₹1.5 Lakh Limit)</h3>
+                    <ul className="text-sm space-y-1 text-slate-300">
+                      <li>• PPF contributions</li>
+                      <li>• EPF contributions</li>
+                      <li>• ELSS mutual funds</li>
+                      <li>• Life insurance premiums</li>
+                      <li>• Home loan principal</li>
+                      <li>• Children's tuition fees</li>
+                      <li>• NSC, tax-saver FDs</li>
+                      <li>• Sukanya Samriddhi Yojana</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20">
+                    <h3 className="font-semibold text-green-400 mb-3">Section 80D (Health Insurance)</h3>
+                    <ul className="text-sm space-y-1 text-slate-300">
+                      <li>• Self & family: ₹25K (₹50K if senior)</li>
+                      <li>• Parents: ₹25K (₹50K if senior)</li>
+                      <li>• Health checkup: ₹5K</li>
+                      <li>• Maximum total: ₹1 lakh</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20">
+                    <h3 className="font-semibold text-purple-400 mb-3">Housing Benefits</h3>
+                    <ul className="text-sm space-y-1 text-slate-300">
+                      <li>• HRA: As per calculation</li>
+                      <li>• Home loan interest: ₹2 lakh</li>
+                      <li>• 80EE: Extra ₹50K (first home)</li>
+                      <li>• 80EEA: Extra ₹1.5L (affordable)</li>
+                    </ul>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="font-semibold text-green-600 mb-3">Health Insurance (80D)</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Self & family: ₹25K (₹50K if senior)</li>
-                    <li>• Parents: ₹25K (₹50K if senior)</li>
-                    <li>• Health checkup: ₹5K</li>
-                    <li>• Maximum total: ₹1 lakh</li>
-                  </ul>
-                </div>
+                <div className="space-y-4">
+                  <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20">
+                    <h3 className="font-semibold text-orange-400 mb-3">Additional Deductions</h3>
+                    <ul className="text-sm space-y-1 text-slate-300">
+                      <li>• 80CCD(1B): NPS ₹50K extra</li>
+                      <li>• 80E: Education loan (no limit)</li>
+                      <li>• 80G: Donations (50%-100%)</li>
+                      <li>• 80TTA: Savings interest ₹10K</li>
+                      <li>• 80U: Disability deduction</li>
+                      <li>• 80DDB: Medical treatment</li>
+                    </ul>
+                  </div>
 
-                <div>
-                  <h3 className="font-semibold text-purple-600 mb-3">Home Loan Benefits</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Principal: Under 80C (₹1.5L limit)</li>
-                    <li>• Interest: ₹2 lakh annually</li>
-                    <li>• 80EE: Extra ₹50K for first home</li>
-                    <li>• 80EEA: Extra ₹1.5L for affordable housing</li>
-                  </ul>
+                  <div className="bg-cyan-500/10 p-4 rounded-xl border border-cyan-500/20">
+                    <h3 className="font-semibold text-cyan-400 mb-3">Salary Exemptions</h3>
+                    <ul className="text-sm space-y-1 text-slate-300">
+                      <li>• LTA: Travel allowance</li>
+                      <li>• Professional tax: ₹2.5K max</li>
+                      <li>• Gratuity: ₹20 lakh limit</li>
+                      <li>• Leave encashment: ₹3 lakh</li>
+                    </ul>
+                  </div>
                 </div>
-
-                <div>
-                  <h3 className="font-semibold text-orange-600 mb-3">Other Key Deductions</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• NPS (80CCD-1B): Extra ₹50K</li>
-                    <li>• Education loan (80E): No limit</li>
-                    <li>• Donations (80G): 10% of income</li>
-                    <li>• HRA: Calculated automatically</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-yellow-800 mb-2">💡 Pro Tips:</h4>
-                <ul className="text-sm text-yellow-700 space-y-1">
-                  <li>• Maximize 80C early in the financial year</li>
-                  <li>• Keep all receipts and certificates</li>
-                  <li>• Plan investments for tax efficiency</li>
-                  <li>• Review annually for optimal regime choice</li>
-                </ul>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="comparison" className="space-y-6">
-          <Card>
+        <TabsContent value="tax-regimes" className="space-y-6">
+          <Card className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Understanding Tax Comparison
-              </CardTitle>
+              <CardTitle className="text-white">Old vs New Tax Regime Comparison</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-800 mb-2">Old Tax Regime</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Lower standard deduction (₹50K)</li>
-                    <li>• All deductions available</li>
-                    <li>• Traditional tax slabs</li>
-                    <li>• Good for high deduction claims</li>
+                <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
+                  <h3 className="font-semibold text-blue-400 mb-3">Old Tax Regime</h3>
+                  <ul className="text-sm space-y-2 text-slate-300">
+                    <li>✅ All deductions available</li>
+                    <li>✅ Standard deduction: ₹50,000</li>
+                    <li>✅ HRA, LTA exemptions</li>
+                    <li>✅ Good for high investments</li>
+                    <li>❌ Higher tax rates</li>
+                    <li>❌ Complex calculations</li>
                   </ul>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-green-800 mb-2">New Tax Regime</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Higher standard deduction (₹75K)</li>
-                    <li>• Limited deductions</li>
-                    <li>• Lower tax rates</li>
-                    <li>• Simplified calculations</li>
+                <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20">
+                  <h3 className="font-semibold text-green-400 mb-3">New Tax Regime</h3>
+                  <ul className="text-sm space-y-2 text-slate-300">
+                    <li>✅ Lower tax rates</li>
+                    <li>✅ Standard deduction: ₹75,000</li>
+                    <li>✅ Higher rebate limit: ₹7L</li>
+                    <li>✅ Simple calculations</li>
+                    <li>❌ Limited deductions</li>
+                    <li>❌ No HRA benefit</li>
                   </ul>
                 </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">PDF Report Features</h3>
-                <ul className="text-sm space-y-1 ml-4">
-                  <li>• Detailed tax calculations in tabular format</li>
-                  <li>• Colorful charts and graphs</li>
-                  <li>• Side-by-side regime comparison</li>
-                  <li>• Tax-saving recommendations</li>
-                  <li>• Legal compliance guidelines</li>
-                </ul>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="faq" className="space-y-6">
+          <div className="space-y-4">
+            {[
+              {
+                q: "Can I switch between tax regimes every year?",
+                a: "Yes, you can choose between old and new regime annually. However, if you have business income, the choice is binding for that year."
+              },
+              {
+                q: "What's the difference between annual salary and basic salary?",
+                a: "Annual salary is your total CTC including all components. Basic salary is just the basic pay component used for HRA calculation."
+              },
+              {
+                q: "How is HRA calculated?",
+                a: "HRA exemption is the minimum of: (i) Actual HRA received, (ii) 50% of basic salary (40% for non-metro), (iii) Actual rent paid minus 10% of basic salary."
+              },
+              {
+                q: "What's Section 87A rebate?",
+                a: "It's a rebate that reduces your tax liability. Old regime: ₹12,500 for income up to ₹5L. New regime: ₹25,000 for income up to ₹7L."
+              },
+              {
+                q: "Can I claim both 80C and 80CCD(1B)?",
+                a: "Yes, 80CCD(1B) is separate from 80C. You can claim ₹1.5L under 80C plus additional ₹50K under 80CCD(1B) for NPS."
+              },
+              {
+                q: "What if my income is below taxable limit?",
+                a: "If your income is below the basic exemption limit (₹2.5L for individuals, ₹3L for senior citizens, ₹5L for super senior citizens), you don't need to pay tax."
+              }
+            ].map((faq, index) => (
+              <Card key={index} className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-white text-base flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4 text-blue-400" />
+                    {faq.q}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-300 text-sm">{faq.a}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="tips" className="space-y-6">
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Legal Tax Saving Tips</CardTitle>
+              <CardTitle className="text-white">Legal Tax Saving Strategies</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-green-800 mb-2">Investment Strategy</h3>
-                  <ul className="text-sm space-y-1">
-                    <li>• Start SIP in ELSS early</li>
+                <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20">
+                  <h3 className="font-semibold text-green-400 mb-2">Smart Investment Tips</h3>
+                  <ul className="text-sm space-y-1 text-slate-300">
+                    <li>• Start ELSS SIP early in the year</li>
                     <li>• Maximize PPF contributions</li>
                     <li>• Consider NPS for extra ₹50K deduction</li>
-                    <li>• Plan insurance premiums wisely</li>
+                    <li>• Plan insurance premiums strategically</li>
                   </ul>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-800 mb-2">Timing Matters</h3>
-                  <ul className="text-sm space-y-1">
+                <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
+                  <h3 className="font-semibold text-blue-400 mb-2">Timing Strategies</h3>
+                  <ul className="text-sm space-y-1 text-slate-300">
                     <li>• Make investments before March 31</li>
-                    <li>• Claim HRA if paying rent</li>
-                    <li>• Keep medical expense receipts</li>
+                    <li>• Keep rent receipts for HRA</li>
+                    <li>• Maintain medical expense records</li>
                     <li>• Review regime choice annually</li>
                   </ul>
                 </div>
               </div>
 
-              <div className="bg-red-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-red-800 mb-2">⚠️ Common Mistakes to Avoid:</h4>
-                <ul className="text-sm text-red-700 space-y-1">
-                  <li>• Don't exceed 80C limit without checking 80CCD-1B</li>
-                  <li>• Don't claim fake HRA without rent receipts</li>
-                  <li>• Don't ignore health insurance benefits</li>
+              <div className="bg-red-500/10 p-4 rounded-xl border border-red-500/20">
+                <h4 className="font-semibold text-red-400 mb-2 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  Common Mistakes to Avoid
+                </h4>
+                <ul className="text-sm text-slate-300 space-y-1">
+                  <li>• Don't exceed 80C limit without utilizing 80CCD-1B</li>
+                  <li>• Don't claim HRA without proper rent receipts</li>
                   <li>• Don't forget to keep investment proofs</li>
+                  <li>• Don't ignore health insurance benefits</li>
+                  <li>• Don't choose regime without proper calculation</li>
                 </ul>
               </div>
             </CardContent>
