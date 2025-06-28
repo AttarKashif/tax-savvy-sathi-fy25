@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TaxResult, IncomeData, DeductionData } from '@/utils/taxCalculations';
 import { CircleCheck, FileText } from 'lucide-react';
 import { generateTaxComparisonPDF } from '@/utils/pdfGenerator';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TaxComparisonProps {
   oldRegimeResult: TaxResult;
@@ -32,6 +34,36 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
   deductions,
   taxpayerName
 }) => {
+  const { user } = useAuth();
+
+  // Save calculation to database when component mounts
+  useEffect(() => {
+    const saveCalculation = async () => {
+      if (!user) return;
+
+      try {
+        await supabase
+          .from('tax_calculations')
+          .insert({
+            user_id: user.id,
+            taxpayer_name: taxpayerName,
+            age: age,
+            income_data: income,
+            deductions_data: deductions,
+            old_regime_tax: oldRegimeResult.totalTax,
+            new_regime_tax: newRegimeResult.totalTax,
+            recommended_regime: recommendation.recommendedRegime
+          });
+        
+        console.log('Calculation saved successfully');
+      } catch (error) {
+        console.error('Error saving calculation:', error);
+      }
+    };
+
+    saveCalculation();
+  }, [user, taxpayerName, age, income, deductions, oldRegimeResult.totalTax, newRegimeResult.totalTax, recommendation.recommendedRegime]);
+
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-IN');
   };
