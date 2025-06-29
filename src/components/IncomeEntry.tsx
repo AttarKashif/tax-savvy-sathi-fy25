@@ -7,12 +7,14 @@ import { Upload, FileText, User, Lock, Unlock, FileSpreadsheet } from 'lucide-re
 import { IncomeData } from '@/utils/taxCalculations';
 import { useToast } from '@/components/ui/use-toast';
 import * as XLSX from 'xlsx';
+
 interface IncomeEntryProps {
   income: IncomeData;
   setIncome: (income: IncomeData) => void;
   taxpayerName: string;
   setTaxpayerName: (name: string) => void;
 }
+
 interface ExtractedData {
   salary?: number;
   basicSalary?: number;
@@ -22,6 +24,7 @@ interface ExtractedData {
   otherSources?: number;
   taxpayerName?: string;
 }
+
 export const IncomeEntry: React.FC<IncomeEntryProps> = ({
   income,
   setIncome,
@@ -30,9 +33,8 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
 }) => {
   const [isLocked, setIsLocked] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   const updateIncome = (field: keyof IncomeData, value: number) => {
     if (!isLocked) {
       setIncome({
@@ -41,14 +43,17 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
       });
     }
   };
+
   const updateTaxpayerName = (name: string) => {
     if (!isLocked) {
       setTaxpayerName(name);
     }
   };
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN').format(value);
   };
+
   const extractDataFromOCR = async (text: string): Promise<ExtractedData> => {
     const extractedData: ExtractedData = {};
 
@@ -62,6 +67,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
       otherSources: /(?:other sources|interest income|dividend)[\s:]*₹?[\s]*([0-9,]+)/i,
       taxpayerName: /(?:name|taxpayer name|employee name)[\s:]*([A-Za-z\s]+)/i
     };
+
     Object.entries(patterns).forEach(([key, pattern]) => {
       const match = text.match(pattern);
       if (match) {
@@ -75,32 +81,38 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
         }
       }
     });
+
     return extractedData;
   };
+
   const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
     setIsProcessing(true);
+
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('apikey', 'K85560277288957');
       formData.append('language', 'eng');
       formData.append('isOverlayRequired', 'false');
+
       const response = await fetch('https://api.ocr.space/parse/image', {
         method: 'POST',
         body: formData
       });
+
       const result = await response.json();
+
       if (result.ParsedResults && result.ParsedResults[0]) {
         const extractedText = result.ParsedResults[0].ParsedText;
         const extractedData = await extractDataFromOCR(extractedText);
 
         // Update income data
         if (Object.keys(extractedData).length > 0) {
-          const newIncome = {
-            ...income
-          };
+          const newIncome = { ...income };
+          
           Object.entries(extractedData).forEach(([key, value]) => {
             if (key === 'taxpayerName' && typeof value === 'string') {
               setTaxpayerName(value);
@@ -108,8 +120,10 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               newIncome[key as keyof IncomeData] = value;
             }
           });
+
           setIncome(newIncome);
           setIsLocked(true);
+
           toast({
             title: "Document Processed Successfully",
             description: "Data extracted and fields have been locked. Use the unlock button to edit."
@@ -137,17 +151,19 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
       event.target.value = '';
     }
   };
+
   const handleExcelUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
     setIsProcessing(true);
+
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-        header: 1
-      });
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
       const extractedData: ExtractedData = {};
 
       // Look for data in the Excel file
@@ -155,6 +171,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
         if (Array.isArray(row) && row.length >= 2) {
           const label = String(row[0]).toLowerCase();
           const value = row[1];
+
           if (label.includes('salary') && label.includes('annual')) {
             extractedData.salary = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
           } else if (label.includes('basic') && label.includes('salary')) {
@@ -172,10 +189,10 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
           }
         }
       });
+
       if (Object.keys(extractedData).length > 0) {
-        const newIncome = {
-          ...income
-        };
+        const newIncome = { ...income };
+        
         Object.entries(extractedData).forEach(([key, value]) => {
           if (key === 'taxpayerName' && typeof value === 'string') {
             setTaxpayerName(value);
@@ -183,8 +200,10 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
             newIncome[key as keyof IncomeData] = value;
           }
         });
+
         setIncome(newIncome);
         setIsLocked(true);
+
         toast({
           title: "Excel Data Imported Successfully",
           description: "Data extracted from Excel file and fields have been locked."
@@ -208,6 +227,7 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
       event.target.value = '';
     }
   };
+
   const toggleLock = () => {
     setIsLocked(!isLocked);
     toast({
@@ -218,10 +238,16 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
 
   // Calculate total income excluding basic salary (basic salary is not separate income)
   const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
-  return <div className="space-y-6">
+
+  return (
+    <div className="space-y-6">
       {/* Lock/Unlock Controls */}
       <div className="flex justify-end">
-        <Button onClick={toggleLock} variant={isLocked ? "destructive" : "outline"} className="flex items-center gap-2">
+        <Button 
+          onClick={toggleLock} 
+          variant={isLocked ? "destructive" : "outline"} 
+          className="flex items-center gap-2"
+        >
           {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
           {isLocked ? "Unlock Fields" : "Lock Fields"}
         </Button>
@@ -238,7 +264,15 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
         <CardContent className="bg-slate-800">
           <div>
             <Label htmlFor="taxpayerName">Full Name</Label>
-            <Input id="taxpayerName" type="text" value={taxpayerName} onChange={e => updateTaxpayerName(e.target.value)} placeholder="Enter your full name" className="mt-1" disabled={isLocked} />
+            <Input 
+              id="taxpayerName" 
+              type="text" 
+              value={taxpayerName} 
+              onChange={e => updateTaxpayerName(e.target.value)} 
+              placeholder="Enter your full name" 
+              className="mt-1" 
+              disabled={isLocked} 
+            />
           </div>
         </CardContent>
       </Card>
@@ -257,17 +291,39 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
               Upload your Form 16, Form 26AS, salary slips (PDF/Images) or Excel file to automatically extract income data
             </p>
             <div className="flex items-center gap-4 flex-wrap">
-              <Button variant="outline" className="flex items-center gap-2" onClick={() => document.getElementById('document-upload')?.click()} disabled={isProcessing}>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2" 
+                onClick={() => document.getElementById('document-upload')?.click()} 
+                disabled={isProcessing}
+              >
                 <Upload className="w-4 h-4" />
                 {isProcessing ? 'Processing...' : 'Upload Tax Document'}
               </Button>
-              <input id="document-upload" type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleDocumentUpload} className="hidden" />
+              <input 
+                id="document-upload" 
+                type="file" 
+                accept=".pdf,.jpg,.jpeg,.png" 
+                onChange={handleDocumentUpload} 
+                className="hidden" 
+              />
               
-              <Button variant="outline" className="flex items-center gap-2" onClick={() => document.getElementById('excel-upload')?.click()} disabled={isProcessing}>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2" 
+                onClick={() => document.getElementById('excel-upload')?.click()} 
+                disabled={isProcessing}
+              >
                 <FileSpreadsheet className="w-4 h-4" />
                 Upload Excel File
               </Button>
-              <input id="excel-upload" type="file" accept=".xlsx,.xls,.csv" onChange={handleExcelUpload} className="hidden" />
+              <input 
+                id="excel-upload" 
+                type="file" 
+                accept=".xlsx,.xls,.csv" 
+                onChange={handleExcelUpload} 
+                className="hidden" 
+              />
             </div>
             
             <div className="bg-green-50 p-3 rounded-lg border border-green-200">
@@ -294,13 +350,29 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="salary">Annual Salary (Total CTC)</Label>
-            <Input id="salary" type="number" value={income.salary || ''} onChange={e => updateIncome('salary', Number(e.target.value) || 0)} placeholder="Enter your total annual salary" className="mt-1" disabled={isLocked} />
+            <Input 
+              id="salary" 
+              type="number" 
+              value={income.salary || ''} 
+              onChange={e => updateIncome('salary', Number(e.target.value) || 0)} 
+              placeholder="Enter your total annual salary" 
+              className="mt-1" 
+              disabled={isLocked} 
+            />
             {income.salary > 0 && <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.salary)}</p>}
           </div>
 
           <div>
             <Label htmlFor="basicSalary">Basic Salary (Annual)</Label>
-            <Input id="basicSalary" type="number" value={income.basicSalary || ''} onChange={e => updateIncome('basicSalary', Number(e.target.value) || 0)} placeholder="Enter basic salary for HRA calculation" className="mt-1" disabled={isLocked} />
+            <Input 
+              id="basicSalary" 
+              type="number" 
+              value={income.basicSalary || ''} 
+              onChange={e => updateIncome('basicSalary', Number(e.target.value) || 0)} 
+              placeholder="Enter basic salary for HRA calculation" 
+              className="mt-1" 
+              disabled={isLocked} 
+            />
             <p className="text-xs text-gray-600 mt-1">
               Required for HRA exemption calculation only (not added to total income)
             </p>
@@ -316,7 +388,15 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
         <CardContent>
           <div>
             <Label htmlFor="business">Business or Professional Income</Label>
-            <Input id="business" type="number" value={income.businessIncome || ''} onChange={e => updateIncome('businessIncome', Number(e.target.value) || 0)} placeholder="Enter business/professional income" className="mt-1" disabled={isLocked} />
+            <Input 
+              id="business" 
+              type="number" 
+              value={income.businessIncome || ''} 
+              onChange={e => updateIncome('businessIncome', Number(e.target.value) || 0)} 
+              placeholder="Enter business/professional income" 
+              className="mt-1" 
+              disabled={isLocked} 
+            />
             {income.businessIncome > 0 && <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.businessIncome)}</p>}
           </div>
         </CardContent>
@@ -329,13 +409,29 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="capitalShort">Short-term Capital Gains</Label>
-            <Input id="capitalShort" type="number" value={income.capitalGainsShort || ''} onChange={e => updateIncome('capitalGainsShort', Number(e.target.value) || 0)} placeholder="Enter short-term capital gains" className="mt-1" disabled={isLocked} />
+            <Input 
+              id="capitalShort" 
+              type="number" 
+              value={income.capitalGainsShort || ''} 
+              onChange={e => updateIncome('capitalGainsShort', Number(e.target.value) || 0)} 
+              placeholder="Enter short-term capital gains" 
+              className="mt-1" 
+              disabled={isLocked} 
+            />
             {income.capitalGainsShort > 0 && <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsShort)}</p>}
           </div>
           
           <div>
             <Label htmlFor="capitalLong">Long-term Capital Gains</Label>
-            <Input id="capitalLong" type="number" value={income.capitalGainsLong || ''} onChange={e => updateIncome('capitalGainsLong', Number(e.target.value) || 0)} placeholder="Enter long-term capital gains" className="mt-1" disabled={isLocked} />
+            <Input 
+              id="capitalLong" 
+              type="number" 
+              value={income.capitalGainsLong || ''} 
+              onChange={e => updateIncome('capitalGainsLong', Number(e.target.value) || 0)} 
+              placeholder="Enter long-term capital gains" 
+              className="mt-1" 
+              disabled={isLocked} 
+            />
             {income.capitalGainsLong > 0 && <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.capitalGainsLong)}</p>}
           </div>
         </CardContent>
@@ -348,7 +444,15 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
         <CardContent>
           <div>
             <Label htmlFor="otherSources">Interest, Dividends, etc.</Label>
-            <Input id="otherSources" type="number" value={income.otherSources || ''} onChange={e => updateIncome('otherSources', Number(e.target.value) || 0)} placeholder="Enter income from other sources" className="mt-1" disabled={isLocked} />
+            <Input 
+              id="otherSources" 
+              type="number" 
+              value={income.otherSources || ''} 
+              onChange={e => updateIncome('otherSources', Number(e.target.value) || 0)} 
+              placeholder="Enter income from other sources" 
+              className="mt-1" 
+              disabled={isLocked} 
+            />
             {income.otherSources > 0 && <p className="text-sm text-gray-600 mt-1">₹{formatCurrency(income.otherSources)}</p>}
           </div>
         </CardContent>
@@ -389,5 +493,6 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
