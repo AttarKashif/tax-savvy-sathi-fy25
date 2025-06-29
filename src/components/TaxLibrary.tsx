@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,7 +40,15 @@ export const TaxLibrary = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCalculations(data || []);
+      
+      // Cast the JSON data to proper types
+      const typedCalculations = (data || []).map(calc => ({
+        ...calc,
+        income_data: calc.income_data as IncomeData,
+        deductions_data: calc.deductions_data as DeductionData
+      })) as SavedCalculation[];
+      
+      setCalculations(typedCalculations);
     } catch (error) {
       console.error('Error fetching calculations:', error);
     } finally {

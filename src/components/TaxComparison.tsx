@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,16 +44,16 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
       try {
         await supabase
           .from('tax_calculations')
-          .insert([{
+          .insert({
             user_id: user.id,
             taxpayer_name: taxpayerName,
             age: age,
-            income_data: income,
-            deductions_data: deductions,
+            income_data: income as any,
+            deductions_data: deductions as any,
             old_regime_tax: oldRegimeResult.totalTax,
             new_regime_tax: newRegimeResult.totalTax,
             recommended_regime: recommendation.recommendedRegime
-          }]);
+          });
         
         console.log('Calculation saved successfully');
       } catch (error) {
