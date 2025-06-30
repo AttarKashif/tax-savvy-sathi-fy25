@@ -5,14 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calculator, ChartBar, HelpCircle, LogOut, User, Library } from 'lucide-react';
+import { Calculator, ChartBar, HelpCircle, LogOut, User, Library, AlertTriangle, Lightbulb } from 'lucide-react';
 import { IncomeData, DeductionData, calculateOldRegimeTax, calculateNewRegimeTax, getOptimalRegime } from '@/utils/taxCalculations';
 import { TaxComparison } from './TaxComparison';
 import { IncomeEntry } from './IncomeEntry';
 import { DeductionEntry } from './DeductionEntry';
 import { HelpManual } from './HelpManual';
 import { TaxLibrary } from './TaxLibrary';
+import { SmartInsights } from './SmartInsights';
 import { useAuth } from '@/hooks/useAuth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const TaxCalculator = () => {
   const {
@@ -53,29 +55,57 @@ export const TaxCalculator = () => {
   });
   const [activeTab, setActiveTab] = useState('income');
   const [showResults, setShowResults] = useState(false);
+  const [anomalies, setAnomalies] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
   const handleIncomeUpdate = useCallback((newIncome: IncomeData) => {
     setIncome(newIncome);
-  }, []);
+    // Smart validation and anomaly detection
+    const newAnomalies = [];
+    const newSuggestions = [];
+    
+    // Anomaly detection
+    if (newIncome.salary > 1000000 && deductions.section80C < 100000) {
+      newAnomalies.push("High salary detected but Section 80C investments seem low");
+    }
+    if (newIncome.basicSalary > 0 && deductions.hra === 0 && newIncome.salary > 300000) {
+      newAnomalies.push("You might be eligible for HRA deduction");
+    }
+    if (newIncome.salary > 500000 && deductions.section80D === 0) {
+      newSuggestions.push("Consider health insurance for Section 80D benefits");
+    }
+    
+    setAnomalies(newAnomalies);
+    setSuggestions(newSuggestions);
+  }, [deductions]);
+
   const handleDeductionsUpdate = useCallback((newDeductions: DeductionData) => {
     setDeductions(newDeductions);
   }, []);
+
   const handleAgeUpdate = useCallback((newAge: number) => {
     setAge(newAge);
   }, []);
+
   const handleTaxpayerNameUpdate = useCallback((newName: string) => {
     setTaxpayerName(newName);
   }, []);
+
   const oldRegimeResult = calculateOldRegimeTax(income, deductions, age);
   const newRegimeResult = calculateNewRegimeTax(income, deductions, age);
   const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
+
   const handleCalculate = useCallback(() => {
     setShowResults(true);
     setActiveTab('results');
   }, []);
+
   const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
   const hasValidIncome = totalIncome > 0;
-  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Modern Header */}
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Header */}
       <div className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-xl">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -84,8 +114,8 @@ export const TaxCalculator = () => {
                 <Calculator className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Tax Calculator</h1>
-                <p className="text-sm text-slate-400">FY 2024-25</p>
+                <h1 className="text-xl font-bold text-white">Smart Tax Calculator</h1>
+                <p className="text-sm text-slate-400">FY 2024-25 • AI-Powered</p>
               </div>
             </div>
             
@@ -105,19 +135,50 @@ export const TaxCalculator = () => {
 
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-7xl mx-auto">
+          {/* Smart Alerts */}
+          {anomalies.length > 0 && (
+            <Alert className="mb-6 bg-amber-500/10 border-amber-500/20">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertDescription className="text-amber-200">
+                <div className="space-y-1">
+                  {anomalies.map((anomaly, index) => (
+                    <div key={index}>• {anomaly}</div>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {suggestions.length > 0 && (
+            <Alert className="mb-6 bg-blue-500/10 border-blue-500/20">
+              <Lightbulb className="h-4 w-4 text-blue-400" />
+              <AlertDescription className="text-blue-200">
+                <div className="space-y-1">
+                  {suggestions.map((suggestion, index) => (
+                    <div key={index}>💡 {suggestion}</div>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-6 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
               <TabsTrigger value="income" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Calculator className="w-4 h-4" />
-                Income Entry
+                Income
               </TabsTrigger>
               <TabsTrigger value="deductions" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Calculator className="w-4 h-4" />
                 Deductions
               </TabsTrigger>
+              <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+                <Lightbulb className="w-4 h-4" />
+                Insights
+              </TabsTrigger>
               <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <ChartBar className="w-4 h-4" />
-                Tax Comparison
+                Results
               </TabsTrigger>
               <TabsTrigger value="library" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Library className="w-4 h-4" />
@@ -156,6 +217,10 @@ export const TaxCalculator = () => {
               <DeductionEntry deductions={deductions} setDeductions={handleDeductionsUpdate} income={income} onCalculate={handleCalculate} hasValidIncome={hasValidIncome} age={age} />
             </TabsContent>
 
+            <TabsContent value="insights" className="space-y-6">
+              <SmartInsights income={income} deductions={deductions} age={age} oldRegimeResult={oldRegimeResult} newRegimeResult={newRegimeResult} />
+            </TabsContent>
+
             <TabsContent value="results" className="space-y-6">
               {showResults && hasValidIncome && <TaxComparison oldRegimeResult={oldRegimeResult} newRegimeResult={newRegimeResult} recommendation={recommendation} age={age} income={income} deductions={deductions} taxpayerName={taxpayerName} />}
             </TabsContent>
@@ -170,5 +235,6 @@ export const TaxCalculator = () => {
           </Tabs>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
