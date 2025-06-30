@@ -65,7 +65,7 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
   const totalOtherDeductions = deductions.homeLoanInterest;
   const totalDeductions = totalSalaryDeductions + totalSection80Deductions + totalOtherDeductions;
 
-  const inputClassName = "bg-slate-800/70 border-slate-600/40 text-white rounded-xl focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 backdrop-blur-sm transition-all duration-200 hover:bg-slate-700/70";
+  const inputClassName = "bg-slate-800/70 border-slate-600/40 text-white rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 backdrop-blur-sm transition-all duration-200 hover:bg-slate-700/70";
   const labelClassName = "text-slate-200 font-medium text-sm";
   const cardClassName = "bg-gradient-to-br from-slate-900/95 to-slate-800/95 border-slate-700/50 backdrop-blur-sm rounded-2xl shadow-2xl";
 
@@ -83,7 +83,7 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
               <Button 
                 onClick={onCalculate} 
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-slate-600 hover:bg-slate-700 rounded-xl px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Calculator className="w-5 h-5 mr-2" />
                 Calculate Tax Comparison
@@ -97,24 +97,24 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
       <Card className={cardClassName}>
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
-            <HelpCircle className="w-6 h-6 text-amber-400 mt-1 flex-shrink-0" />
+            <HelpCircle className="w-6 h-6 text-slate-400 mt-1 flex-shrink-0" />
             <div>
-              <h3 className="text-lg font-semibold text-amber-400 mb-2">Deductions Information</h3>
-              <p className="text-slate-300 text-sm mb-3">
+              <h3 className="text-lg font-semibold text-slate-300 mb-2">Deductions Information</h3>
+              <p className="text-slate-400 text-sm mb-3">
                 Enter your deduction amounts. Most deductions apply only to the Old Tax Regime.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/30">
-                  <h4 className="text-blue-400 font-medium text-sm mb-1">Salary Deductions</h4>
-                  <p className="text-xs text-blue-300">HRA, LTA, Professional Tax, Gratuity</p>
+                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-600/30">
+                  <h4 className="text-slate-300 font-medium text-sm mb-1">Salary Deductions</h4>
+                  <p className="text-xs text-slate-400">HRA, LTA, Professional Tax, Gratuity</p>
                 </div>
-                <div className="bg-green-900/30 p-3 rounded-lg border border-green-500/30">
-                  <h4 className="text-green-400 font-medium text-sm mb-1">Section 80 Deductions</h4>
-                  <p className="text-xs text-green-300">80C, 80D, 80E, 80G and others</p>
+                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-600/30">
+                  <h4 className="text-slate-300 font-medium text-sm mb-1">Section 80 Deductions</h4>
+                  <p className="text-xs text-slate-400">80C, 80D, 80E, 80G and others</p>
                 </div>
-                <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/30">
-                  <h4 className="text-purple-400 font-medium text-sm mb-1">Other Deductions</h4>
-                  <p className="text-xs text-purple-300">Home Loan Interest, NPS Additional</p>
+                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-600/30">
+                  <h4 className="text-slate-300 font-medium text-sm mb-1">Other Deductions</h4>
+                  <p className="text-xs text-slate-400">Home Loan Interest, NPS Additional</p>
                 </div>
               </div>
             </div>
@@ -125,7 +125,7 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
       {/* SALARY DEDUCTIONS SECTION */}
       <Card className={cardClassName}>
         <CardHeader>
-          <CardTitle className="text-xl text-blue-400 flex items-center gap-2">
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
             <Receipt className="w-6 h-6" />
             Salary Deductions
             <span className="text-sm font-normal text-slate-400">(Old Regime Only)</span>
@@ -133,8 +133,8 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* HRA Calculation */}
-          <div className="bg-blue-900/20 p-4 rounded-xl border border-blue-500/30">
-            <h3 className="text-lg font-semibold text-blue-400 mb-4">HRA Exemption Calculator</h3>
+          <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-600/30">
+            <h3 className="text-lg font-semibold text-slate-300 mb-4">HRA Exemption Calculator</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className={labelClassName}>Monthly Rent Paid</Label>
@@ -163,27 +163,27 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
                   type="number" 
                   value={income.basicSalary || ''} 
                   readOnly
-                  className="bg-slate-700/50 border-slate-600/40 text-slate-300"
+                  className="bg-slate-700/50 border-slate-600/40 text-slate-400"
                   placeholder="Enter in Income section"
                 />
               </div>
               <div className="space-y-2">
                 <Button 
                   onClick={calculateHRAExemption}
-                  className="bg-blue-600 hover:bg-blue-700 rounded-xl"
+                  className="bg-slate-600 hover:bg-slate-700 rounded-xl"
                 >
                   Calculate HRA Exemption
                 </Button>
               </div>
             </div>
             {deductions.hra > 0 && (
-              <div className="mt-4 p-3 bg-green-900/30 rounded-lg border border-green-500/30">
-                <h4 className="text-green-400 font-semibold mb-2">HRA Calculation Working:</h4>
-                <div className="text-sm text-green-300 space-y-1">
+              <div className="mt-4 p-3 bg-slate-800/50 rounded-lg border border-slate-600/30">
+                <h4 className="text-slate-300 font-semibold mb-2">HRA Calculation Working:</h4>
+                <div className="text-sm text-slate-400 space-y-1">
                   <p>• HRA Received: ₹{formatCurrency(hraDetails.monthlyRent * 12)}</p>
                   <p>• Rent - 10% of Basic: ₹{formatCurrency(Math.max(0, (hraDetails.monthlyRent * 12) - (income.basicSalary * 0.1)))}</p>
                   <p>• {hraDetails.cityType === 'metro' ? '50%' : '40%'} of Basic: ₹{formatCurrency(income.basicSalary * (hraDetails.cityType === 'metro' ? 0.5 : 0.4))}</p>
-                  <p className="font-semibold text-green-400">• HRA Exemption: ₹{formatCurrency(deductions.hra)}</p>
+                  <p className="font-semibold text-slate-300">• HRA Exemption: ₹{formatCurrency(deductions.hra)}</p>
                 </div>
               </div>
             )}
@@ -239,8 +239,8 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
             </div>
           </div>
 
-          <div className="bg-blue-900/20 p-3 rounded-lg">
-            <p className="text-blue-400 font-semibold">Total Salary Deductions: ₹{formatCurrency(totalSalaryDeductions)}</p>
+          <div className="bg-slate-800/50 p-3 rounded-lg">
+            <p className="text-slate-300 font-semibold">Total Salary Deductions: ₹{formatCurrency(totalSalaryDeductions)}</p>
           </div>
         </CardContent>
       </Card>
@@ -248,7 +248,7 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
       {/* SECTION 80 DEDUCTIONS */}
       <Card className={cardClassName}>
         <CardHeader>
-          <CardTitle className="text-xl text-green-400 flex items-center gap-2">
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
             <Heart className="w-6 h-6" />
             Section 80 Deductions (Chapter VI-A)
             <span className="text-sm font-normal text-slate-400">(Old Regime Only)</span>
@@ -256,8 +256,8 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Section 80C Group */}
-          <div className="bg-green-900/20 p-4 rounded-xl border border-green-500/30">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">Section 80C, 80CCC, 80CCD Group (Combined Limit: ₹1.5 Lakh)</h3>
+          <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-600/30">
+            <h3 className="text-lg font-semibold text-slate-300 mb-4">Section 80C, 80CCC, 80CCD Group (Combined Limit: ₹1.5 Lakh)</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className={labelClassName}>Section 80C</Label>
@@ -295,9 +295,9 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
                 <p className="text-xs text-slate-400">NPS employee contribution</p>
               </div>
             </div>
-            <div className="mt-4 p-3 bg-green-900/30 rounded-lg">
-              <p className="text-green-400 font-semibold">Section 80C Group Total: ₹{formatCurrency(section80CGroup)}</p>
-              <p className="text-xs text-green-300 mt-1">Effective Deduction: ₹{formatCurrency(Math.min(150000, section80CGroup))} (Max ₹1.5 Lakh)</p>
+            <div className="mt-4 p-3 bg-slate-800/50 rounded-lg">
+              <p className="text-slate-300 font-semibold">Section 80C Group Total: ₹{formatCurrency(section80CGroup)}</p>
+              <p className="text-xs text-slate-400 mt-1">Effective Deduction: ₹{formatCurrency(Math.min(150000, section80CGroup))} (Max ₹1.5 Lakh)</p>
             </div>
           </div>
 
@@ -423,8 +423,8 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
             </div>
           </div>
 
-          <div className="bg-green-900/20 p-3 rounded-lg">
-            <p className="text-green-400 font-semibold">Total Section 80 Deductions: ₹{formatCurrency(totalSection80Deductions)}</p>
+          <div className="bg-slate-800/50 p-3 rounded-lg">
+            <p className="text-slate-300 font-semibold">Total Section 80 Deductions: ₹{formatCurrency(totalSection80Deductions)}</p>
           </div>
         </CardContent>
       </Card>
@@ -432,7 +432,7 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
       {/* OTHER DEDUCTIONS */}
       <Card className={cardClassName}>
         <CardHeader>
-          <CardTitle className="text-xl text-purple-400 flex items-center gap-2">
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
             <Home className="w-6 h-6" />
             Other Deductions
             <span className="text-sm font-normal text-slate-400">(Old Regime Only)</span>
@@ -451,44 +451,44 @@ export const DeductionEntry: React.FC<DeductionEntryProps> = ({
             <p className="text-xs text-slate-400">For self-occupied property - Max ₹2 Lakh per year</p>
           </div>
 
-          <div className="bg-purple-900/20 p-3 rounded-lg">
-            <p className="text-purple-400 font-semibold">Total Other Deductions: ₹{formatCurrency(totalOtherDeductions)}</p>
+          <div className="bg-slate-800/50 p-3 rounded-lg">
+            <p className="text-slate-300 font-semibold">Total Other Deductions: ₹{formatCurrency(totalOtherDeductions)}</p>
           </div>
         </CardContent>
       </Card>
 
       {/* DEDUCTION SUMMARY */}
-      <Card className="bg-gradient-to-r from-green-900/90 to-blue-900/90 border-green-500/50 backdrop-blur-sm rounded-2xl shadow-2xl">
+      <Card className="bg-gradient-to-r from-slate-900/90 to-slate-800/90 border-slate-600/50 backdrop-blur-sm rounded-2xl shadow-2xl">
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-4">
-            <TrendingDown className="w-6 h-6 text-green-400" />
-            <h3 className="text-xl font-bold text-green-400">Deduction Summary</h3>
+            <TrendingDown className="w-6 h-6 text-slate-400" />
+            <h3 className="text-xl font-bold text-slate-200">Deduction Summary</h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
-              <h4 className="text-blue-400 font-semibold mb-2">Salary Deductions</h4>
+            <div className="bg-slate-800/60 p-4 rounded-lg border border-slate-600/30">
+              <h4 className="text-slate-300 font-semibold mb-2">Salary Deductions</h4>
               <p className="text-2xl font-bold text-white">₹{formatCurrency(totalSalaryDeductions)}</p>
-              <p className="text-xs text-blue-300 mt-1">HRA, LTA, Professional Tax, etc.</p>
+              <p className="text-xs text-slate-400 mt-1">HRA, LTA, Professional Tax, etc.</p>
             </div>
             
-            <div className="bg-green-900/30 p-4 rounded-lg border border-green-500/30">
-              <h4 className="text-green-400 font-semibold mb-2">Section 80 Deductions</h4>
+            <div className="bg-slate-800/60 p-4 rounded-lg border border-slate-600/30">
+              <h4 className="text-slate-300 font-semibold mb-2">Section 80 Deductions</h4>
               <p className="text-2xl font-bold text-white">₹{formatCurrency(totalSection80Deductions)}</p>
-              <p className="text-xs text-green-300 mt-1">80C, 80D, 80E, 80G, etc.</p>
+              <p className="text-xs text-slate-400 mt-1">80C, 80D, 80E, 80G, etc.</p>
             </div>
             
-            <div className="bg-purple-900/30 p-4 rounded-lg border border-purple-500/30">
-              <h4 className="text-purple-400 font-semibold mb-2">Other Deductions</h4>
+            <div className="bg-slate-800/60 p-4 rounded-lg border border-slate-600/30">
+              <h4 className="text-slate-300 font-semibold mb-2">Other Deductions</h4>
               <p className="text-2xl font-bold text-white">₹{formatCurrency(totalOtherDeductions)}</p>
-              <p className="text-xs text-purple-300 mt-1">Home Loan Interest</p>
+              <p className="text-xs text-slate-400 mt-1">Home Loan Interest</p>
             </div>
           </div>
           
-          <div className="bg-slate-800/60 p-4 rounded-xl border border-green-500/30">
-            <h4 className="text-green-400 font-semibold text-lg mb-2">Total Deductions (Old Regime)</h4>
+          <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-500/30">
+            <h4 className="text-slate-300 font-semibold text-lg mb-2">Total Deductions (Old Regime)</h4>
             <p className="text-3xl font-bold text-white">₹{formatCurrency(totalDeductions)}</p>
-            <p className="text-sm text-slate-300 mt-2">
+            <p className="text-sm text-slate-400 mt-2">
               These deductions will reduce your taxable income in the Old Tax Regime
             </p>
           </div>

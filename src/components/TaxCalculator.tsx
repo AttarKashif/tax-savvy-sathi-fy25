@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import { DeductionEntry } from './DeductionEntry';
 import { HelpManual } from './HelpManual';
 import { TaxLibrary } from './TaxLibrary';
 import { useAuth } from '@/hooks/useAuth';
+
 export const TaxCalculator = () => {
   const {
     user,
@@ -78,7 +80,7 @@ export const TaxCalculator = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center shadow-lg">
                 <Calculator className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -104,22 +106,26 @@ export const TaxCalculator = () => {
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-7xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
-              <TabsTrigger value="income" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
+            <TabsList className="grid w-full grid-cols-5 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
+              <TabsTrigger value="income" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Calculator className="w-4 h-4" />
                 Income Entry
               </TabsTrigger>
-              <TabsTrigger value="deductions" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
+              <TabsTrigger value="deductions" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Calculator className="w-4 h-4" />
                 Deductions
               </TabsTrigger>
-              <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
+              <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <ChartBar className="w-4 h-4" />
                 Tax Comparison
               </TabsTrigger>
-              <TabsTrigger value="library" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-50">
+              <TabsTrigger value="library" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Library className="w-4 h-4" />
                 Library
+              </TabsTrigger>
+              <TabsTrigger value="help" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+                <HelpCircle className="w-4 h-4" />
+                Help
               </TabsTrigger>
             </TabsList>
 
@@ -127,7 +133,7 @@ export const TaxCalculator = () => {
               <Card className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm hover:bg-slate-800/60 transition-all duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-white">
-                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center">
                       <Calculator className="w-4 h-4 text-white" />
                     </div>
                     Income Details
@@ -137,7 +143,7 @@ export const TaxCalculator = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="age" className="text-slate-300 font-medium">Age</Label>
-                      <Input id="age" type="number" value={age || ''} onChange={e => handleAgeUpdate(Number(e.target.value) || 0)} min="18" max="100" className="bg-slate-700/50 border-slate-600/50 text-white rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="Enter your age" />
+                      <Input id="age" type="number" value={age || ''} onChange={e => handleAgeUpdate(Number(e.target.value) || 0)} min="18" max="100" className="bg-slate-700/50 border-slate-600/50 text-white rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 transition-all duration-200" placeholder="Enter your age" />
                     </div>
                   </div>
                   
@@ -156,6 +162,10 @@ export const TaxCalculator = () => {
 
             <TabsContent value="library" className="space-y-6">
               <TaxLibrary />
+            </TabsContent>
+
+            <TabsContent value="help" className="space-y-6">
+              <HelpManual />
             </TabsContent>
           </Tabs>
         </div>

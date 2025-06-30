@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { IncomeData } from '@/utils/taxCalculations';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Upload, FileText, User, Lock, Unlock, FileSpreadsheet, Calculator, Info } from 'lucide-react';
-import { IncomeData } from '@/utils/taxCalculations';
-import { useToast } from '@/components/ui/use-toast';
-import * as XLSX from 'xlsx';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calculator, DollarSign, TrendingUp, PiggyBank, Building, Briefcase } from 'lucide-react';
 
 interface IncomeEntryProps {
   income: IncomeData;
@@ -15,497 +12,200 @@ interface IncomeEntryProps {
   setTaxpayerName: (name: string) => void;
 }
 
-interface ExtractedData {
-  salary?: number;
-  basicSalary?: number;
-  businessIncome?: number;
-  capitalGainsShort?: number;
-  capitalGainsLong?: number;
-  otherSources?: number;
-  taxpayerName?: string;
-}
-
-export const IncomeEntry: React.FC<IncomeEntryProps> = ({
-  income,
-  setIncome,
-  taxpayerName,
-  setTaxpayerName
-}) => {
-  const [isLocked, setIsLocked] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
-
-  const updateIncome = (field: keyof IncomeData, value: number) => {
-    if (!isLocked) {
-      setIncome({
-        ...income,
-        [field]: value
-      });
-    }
-  };
-
-  const updateTaxpayerName = (name: string) => {
-    if (!isLocked) {
-      setTaxpayerName(name);
-    }
+export const IncomeEntry: React.FC<IncomeEntryProps> = ({ income, setIncome, taxpayerName, setTaxpayerName }) => {
+  const handleIncomeChange = (field: keyof IncomeData, value: number) => {
+    setIncome({
+      ...income,
+      [field]: value
+    });
   };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN').format(value);
   };
 
-  const extractDataFromOCR = async (text: string): Promise<ExtractedData> => {
-    const extractedData: ExtractedData = {};
+  const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
 
-    // Pattern matching for common tax document formats
-    const patterns = {
-      salary: /(?:gross salary|total salary|annual salary|ctc)[\s:]*₹?[\s]*([0-9,]+)/i,
-      basicSalary: /(?:basic salary|basic pay)[\s:]*₹?[\s]*([0-9,]+)/i,
-      businessIncome: /(?:business income|professional income)[\s:]*₹?[\s]*([0-9,]+)/i,
-      capitalGainsShort: /(?:short.?term capital gains|stcg)[\s:]*₹?[\s]*([0-9,]+)/i,
-      capitalGainsLong: /(?:long.?term capital gains|ltcg)[\s:]*₹?[\s]*([0-9,]+)/i,
-      otherSources: /(?:other sources|interest income|dividend)[\s:]*₹?[\s]*([0-9,]+)/i,
-      taxpayerName: /(?:name|taxpayer name|employee name)[\s:]*([A-Za-z\s]+)/i
-    };
-
-    Object.entries(patterns).forEach(([key, pattern]) => {
-      const match = text.match(pattern);
-      if (match) {
-        if (key === 'taxpayerName') {
-          extractedData.taxpayerName = match[1].trim();
-        } else {
-          const value = parseFloat(match[1].replace(/,/g, ''));
-          if (!isNaN(value)) {
-            (extractedData as any)[key] = value;
-          }
-        }
-      }
-    });
-
-    return extractedData;
-  };
-
-  const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessing(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('apikey', 'K85560277288957');
-      formData.append('language', 'eng');
-      formData.append('isOverlayRequired', 'false');
-
-      const response = await fetch('https://api.ocr.space/parse/image', {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (result.ParsedResults && result.ParsedResults[0]) {
-        const extractedText = result.ParsedResults[0].ParsedText;
-        const extractedData = await extractDataFromOCR(extractedText);
-
-        // Update income data
-        if (Object.keys(extractedData).length > 0) {
-          const newIncome = { ...income };
-          
-          Object.entries(extractedData).forEach(([key, value]) => {
-            if (key === 'taxpayerName' && typeof value === 'string') {
-              setTaxpayerName(value);
-            } else if (typeof value === 'number') {
-              newIncome[key as keyof IncomeData] = value;
-            }
-          });
-
-          setIncome(newIncome);
-          setIsLocked(true);
-
-          toast({
-            title: "Document Processed Successfully",
-            description: "Data extracted and fields have been locked. Use the unlock button to edit."
-          });
-        } else {
-          toast({
-            title: "No Data Found",
-            description: "Could not extract financial data from the document. Please check the document format.",
-            variant: "destructive"
-          });
-        }
-      } else {
-        throw new Error('OCR processing failed');
-      }
-    } catch (error) {
-      console.error('OCR Error:', error);
-      toast({
-        title: "Document Processing Failed",
-        description: "Failed to process the document. Please try again or enter data manually.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-      // Clear the input
-      event.target.value = '';
-    }
-  };
-
-  const handleExcelUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessing(true);
-
-    try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-      const extractedData: ExtractedData = {};
-
-      // Look for data in the Excel file
-      jsonData.forEach((row: any) => {
-        if (Array.isArray(row) && row.length >= 2) {
-          const label = String(row[0]).toLowerCase();
-          const value = row[1];
-
-          if (label.includes('salary') && label.includes('annual')) {
-            extractedData.salary = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
-          } else if (label.includes('basic') && label.includes('salary')) {
-            extractedData.basicSalary = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
-          } else if (label.includes('business')) {
-            extractedData.businessIncome = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
-          } else if (label.includes('short') && label.includes('capital')) {
-            extractedData.capitalGainsShort = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
-          } else if (label.includes('long') && label.includes('capital')) {
-            extractedData.capitalGainsLong = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
-          } else if (label.includes('other') && label.includes('sources')) {
-            extractedData.otherSources = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
-          } else if (label.includes('name') && !label.includes('file')) {
-            extractedData.taxpayerName = String(value);
-          }
-        }
-      });
-
-      if (Object.keys(extractedData).length > 0) {
-        const newIncome = { ...income };
-        
-        Object.entries(extractedData).forEach(([key, value]) => {
-          if (key === 'taxpayerName' && typeof value === 'string') {
-            setTaxpayerName(value);
-          } else if (typeof value === 'number') {
-            newIncome[key as keyof IncomeData] = value;
-          }
-        });
-
-        setIncome(newIncome);
-        setIsLocked(true);
-
-        toast({
-          title: "Excel Data Imported Successfully",
-          description: "Data extracted from Excel file and fields have been locked."
-        });
-      } else {
-        toast({
-          title: "No Valid Data Found",
-          description: "Could not find recognizable income data in the Excel file.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Excel processing error:', error);
-      toast({
-        title: "Excel Processing Failed",
-        description: "Failed to process the Excel file. Please check the format and try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-      event.target.value = '';
-    }
-  };
-
-  const toggleLock = () => {
-    setIsLocked(!isLocked);
-    toast({
-      title: isLocked ? "Fields Unlocked" : "Fields Locked",
-      description: isLocked ? "You can now edit the fields" : "Fields are now locked from editing"
-    });
-  };
-
-  const inputClassName = "bg-slate-800/70 border-slate-600/40 text-white rounded-xl focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 backdrop-blur-sm transition-all duration-200 hover:bg-slate-700/70";
+  const inputClassName = "bg-slate-800/70 border-slate-600/40 text-white rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 backdrop-blur-sm transition-all duration-200 hover:bg-slate-700/70";
   const labelClassName = "text-slate-200 font-medium text-sm";
   const cardClassName = "bg-gradient-to-br from-slate-900/95 to-slate-800/95 border-slate-700/50 backdrop-blur-sm rounded-2xl shadow-2xl";
 
-  // Calculate total income excluding basic salary (basic salary is not separate income)
-  const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
-
   return (
     <div className="space-y-6">
-      {/* Lock/Unlock Controls */}
-      <div className="flex justify-end">
-        <Button 
-          onClick={toggleLock} 
-          variant={isLocked ? "destructive" : "outline"} 
-          className="flex items-center gap-2 bg-slate-800/80 border-slate-600/40 text-white hover:bg-slate-700/80 rounded-xl"
-        >
-          {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-          {isLocked ? "Unlock Fields" : "Lock Fields"}
-        </Button>
-      </div>
-
-      {/* Taxpayer Information */}
-      <Card className={`${cardClassName} ${isLocked ? 'opacity-75' : ''}`}>
-        <CardHeader>
-          <CardTitle className="text-lg text-blue-400 flex items-center gap-2">
-            <User className="w-5 h-5" />
-            Taxpayer Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="taxpayerName" className={labelClassName}>Full Name</Label>
-            <Input 
-              id="taxpayerName" 
-              type="text" 
-              value={taxpayerName} 
-              onChange={e => updateTaxpayerName(e.target.value)} 
-              placeholder="Enter your full name" 
-              className={inputClassName}
-              disabled={isLocked} 
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Document Upload Section */}
+      {/* Personal Information */}
       <Card className={cardClassName}>
         <CardHeader>
-          <CardTitle className="text-lg text-purple-400 flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Document Scanner & Excel Import
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
+            <Briefcase className="w-6 h-6" />
+            Personal Information
           </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-slate-300">
-              Upload your Form 16, Form 26AS, salary slips (PDF/Images) or Excel file to automatically extract income data
-            </p>
-            <div className="flex items-center gap-4 flex-wrap">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 bg-slate-800/80 border-slate-600/40 text-white hover:bg-slate-700/80 rounded-xl" 
-                onClick={() => document.getElementById('document-upload')?.click()} 
-                disabled={isProcessing}
-              >
-                <Upload className="w-4 h-4" />
-                {isProcessing ? 'Processing...' : 'Upload Tax Document'}
-              </Button>
-              <input 
-                id="document-upload" 
-                type="file" 
-                accept=".pdf,.jpg,.jpeg,.png" 
-                onChange={handleDocumentUpload} 
-                className="hidden" 
-              />
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 bg-slate-800/80 border-slate-600/40 text-white hover:bg-slate-700/80 rounded-xl" 
-                onClick={() => document.getElementById('excel-upload')?.click()} 
-                disabled={isProcessing}
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                Upload Excel File
-              </Button>
-              <input 
-                id="excel-upload" 
-                type="file" 
-                accept=".xlsx,.xls,.csv" 
-                onChange={handleExcelUpload} 
-                className="hidden" 
-              />
-            </div>
-            
-            <div className="bg-green-900/30 p-4 rounded-xl border border-green-500/30">
-              <h4 className="text-sm font-medium text-green-400 mb-2 flex items-center gap-2">
-                <Info className="w-4 h-4" />
-                Document Scanning: Active
-              </h4>
-              <p className="text-xs text-green-300 mb-2">
-                <strong>Status:</strong> OCR service is connected and ready to process documents.
-              </p>
-              <p className="text-xs text-green-300 mb-2">
-                <strong>Supported formats:</strong> PDF, JPG, PNG images and Excel files (.xlsx, .xls, .csv).
-              </p>
-              <p className="text-xs text-green-300">
-                <strong>Note:</strong> After successful extraction, input fields will be automatically locked. Use the unlock button to make changes.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Income Entry Cards */}
-      <Card className={`${cardClassName} ${isLocked ? 'opacity-75' : ''}`}>
-        <CardHeader>
-          <CardTitle className="text-lg text-blue-400">Salary Income</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="salary" className={labelClassName}>Annual Salary (Total CTC)</Label>
+            <Label className={labelClassName}>Taxpayer Name</Label>
             <Input 
-              id="salary" 
-              type="number" 
-              value={income.salary || ''} 
-              onChange={e => updateIncome('salary', Number(e.target.value) || 0)} 
-              placeholder="Enter your total annual salary" 
+              type="text" 
+              value={taxpayerName} 
+              onChange={e => setTaxpayerName(e.target.value)}
+              placeholder="Enter your full name"
               className={inputClassName}
-              disabled={isLocked} 
             />
-            {income.salary > 0 && <p className="text-sm text-slate-400">₹{formatCurrency(income.salary)}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="basicSalary" className={labelClassName}>Basic Salary (Annual)</Label>
-            <Input 
-              id="basicSalary" 
-              type="number" 
-              value={income.basicSalary || ''} 
-              onChange={e => updateIncome('basicSalary', Number(e.target.value) || 0)} 
-              placeholder="Enter basic salary for HRA calculation" 
-              className={inputClassName}
-              disabled={isLocked} 
-            />
-            <p className="text-xs text-slate-400">
-              Required for HRA exemption calculation only (not added to total income)
-            </p>
-            {income.basicSalary > 0 && <p className="text-sm text-slate-400">₹{formatCurrency(income.basicSalary)}</p>}
+            <p className="text-xs text-slate-400">This will appear on your tax calculation report</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className={`${cardClassName} ${isLocked ? 'opacity-75' : ''}`}>
+      {/* Salary Income */}
+      <Card className={cardClassName}>
         <CardHeader>
-          <CardTitle className="text-lg text-green-400">Business/Professional Income</CardTitle>
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
+            <Building className="w-6 h-6" />
+            Salary Income
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className={labelClassName}>Annual Salary (CTC)</Label>
+              <Input 
+                type="number" 
+                value={income.salary || ''} 
+                onChange={e => handleIncomeChange('salary', Number(e.target.value) || 0)}
+                placeholder="Enter your annual CTC"
+                className={inputClassName}
+              />
+              <p className="text-xs text-slate-400">Complete Cost to Company including all allowances</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className={labelClassName}>Basic Salary (Annual)</Label>
+              <Input 
+                type="number" 
+                value={income.basicSalary || ''} 
+                onChange={e => handleIncomeChange('basicSalary', Number(e.target.value) || 0)}
+                placeholder="Enter your basic salary"
+                className={inputClassName}
+              />
+              <p className="text-xs text-slate-400">Basic salary component for HRA calculation</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Business & Professional Income */}
+      <Card className={cardClassName}>
+        <CardHeader>
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
+            <TrendingUp className="w-6 h-6" />
+            Business & Professional Income
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="business" className={labelClassName}>Business or Professional Income</Label>
+            <Label className={labelClassName}>Business/Professional Income</Label>
             <Input 
-              id="business" 
               type="number" 
               value={income.businessIncome || ''} 
-              onChange={e => updateIncome('businessIncome', Number(e.target.value) || 0)} 
-              placeholder="Enter business/professional income" 
+              onChange={e => handleIncomeChange('businessIncome', Number(e.target.value) || 0)}
+              placeholder="Enter net business income"
               className={inputClassName}
-              disabled={isLocked} 
             />
-            {income.businessIncome > 0 && <p className="text-sm text-slate-400">₹{formatCurrency(income.businessIncome)}</p>}
+            <p className="text-xs text-slate-400">Net profit from business or professional services</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className={`${cardClassName} ${isLocked ? 'opacity-75' : ''}`}>
+      {/* Capital Gains */}
+      <Card className={cardClassName}>
         <CardHeader>
-          <CardTitle className="text-lg text-purple-400">Capital Gains</CardTitle>
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
+            <PiggyBank className="w-6 h-6" />
+            Capital Gains
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className={labelClassName}>Short-term Capital Gains</Label>
+              <Input 
+                type="number" 
+                value={income.capitalGainsShort || ''} 
+                onChange={e => handleIncomeChange('capitalGainsShort', Number(e.target.value) || 0)}
+                placeholder="STCG amount"
+                className={inputClassName}
+              />
+              <p className="text-xs text-slate-400">From assets held for less than 1 year</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className={labelClassName}>Long-term Capital Gains</Label>
+              <Input 
+                type="number" 
+                value={income.capitalGainsLong || ''} 
+                onChange={e => handleIncomeChange('capitalGainsLong', Number(e.target.value) || 0)}
+                placeholder="LTCG amount"
+                className={inputClassName}
+              />
+              <p className="text-xs text-slate-400">From assets held for more than 1 year</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Other Income */}
+      <Card className={cardClassName}>
+        <CardHeader>
+          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
+            <DollarSign className="w-6 h-6" />
+            Other Income Sources
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="capitalShort" className={labelClassName}>Short-term Capital Gains</Label>
+            <Label className={labelClassName}>Other Sources Income</Label>
             <Input 
-              id="capitalShort" 
-              type="number" 
-              value={income.capitalGainsShort || ''} 
-              onChange={e => updateIncome('capitalGainsShort', Number(e.target.value) || 0)} 
-              placeholder="Enter short-term capital gains" 
-              className={inputClassName}
-              disabled={isLocked} 
-            />
-            {income.capitalGainsShort > 0 && <p className="text-sm text-slate-400">₹{formatCurrency(income.capitalGainsShort)}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="capitalLong" className={labelClassName}>Long-term Capital Gains</Label>
-            <Input 
-              id="capitalLong" 
-              type="number" 
-              value={income.capitalGainsLong || ''} 
-              onChange={e => updateIncome('capitalGainsLong', Number(e.target.value) || 0)} 
-              placeholder="Enter long-term capital gains" 
-              className={inputClassName}
-              disabled={isLocked} 
-            />
-            {income.capitalGainsLong > 0 && <p className="text-sm text-slate-400">₹{formatCurrency(income.capitalGainsLong)}</p>}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className={`${cardClassName} ${isLocked ? 'opacity-75' : ''}`}>
-        <CardHeader>
-          <CardTitle className="text-lg text-orange-400">Other Sources</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="otherSources" className={labelClassName}>Interest, Dividends, etc.</Label>
-            <Input 
-              id="otherSources" 
               type="number" 
               value={income.otherSources || ''} 
-              onChange={e => updateIncome('otherSources', Number(e.target.value) || 0)} 
-              placeholder="Enter income from other sources" 
+              onChange={e => handleIncomeChange('otherSources', Number(e.target.value) || 0)}
+              placeholder="Interest, dividends, rental etc."
               className={inputClassName}
-              disabled={isLocked} 
             />
-            {income.otherSources > 0 && <p className="text-sm text-slate-400">₹{formatCurrency(income.otherSources)}</p>}
+            <p className="text-xs text-slate-400">Interest from savings/FD, dividends, rental income, etc.</p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Total Income Summary */}
-      <Card className="bg-gradient-to-r from-blue-900/90 to-purple-900/90 border-blue-500/50 backdrop-blur-sm rounded-2xl shadow-2xl">
+      {/* Income Summary */}
+      <Card className="bg-gradient-to-r from-slate-900/90 to-slate-800/90 border-slate-600/50 backdrop-blur-sm rounded-2xl shadow-2xl">
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 mb-4">
-            <Calculator className="w-6 h-6 text-blue-400" />
-            <h3 className="text-xl font-bold text-blue-400">Total Gross Income</h3>
+            <Calculator className="w-6 h-6 text-slate-400" />
+            <h3 className="text-xl font-bold text-slate-200">Income Summary</h3>
           </div>
-          <p className="text-3xl font-bold text-white mb-2">
-            ₹{formatCurrency(totalIncome)}
-          </p>
-          <p className="text-sm text-slate-300">
-            Note: Basic salary is used only for HRA calculation and not added to total income
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Income Tax Website Integration Notice */}
-      <Card className="bg-gradient-to-r from-amber-900/80 to-orange-900/80 border-amber-500/50 backdrop-blur-sm rounded-2xl shadow-xl">
-        <CardHeader>
-          <CardTitle className="text-lg text-amber-400 flex items-center gap-2">
-            <Info className="w-5 h-5" />
-            Income Tax Website Integration
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-amber-200 mb-3">
-            Direct integration with the Income Tax website (incometax.gov.in) requires backend authentication and security protocols that cannot be implemented in a frontend-only application.
-          </p>
-          <p className="text-sm text-amber-200 mb-3">
-            <strong>Alternative approach:</strong> Use our generated PDF report to manually fill your tax return on the Income Tax website.
-          </p>
-          <div className="bg-slate-800/60 p-4 rounded-xl border border-amber-500/30">
-            <h4 className="font-medium text-amber-300 mb-2">Steps to file your return:</h4>
-            <ol className="text-xs text-amber-200 space-y-1">
-              <li>1. Generate the tax comparison PDF report from this application</li>
-              <li>2. Visit <a href="https://www.incometax.gov.in/iec/foportal/" target="_blank" rel="noopener noreferrer" className="underline text-blue-300 hover:text-blue-200">Income Tax e-Filing portal</a></li>
-              <li>3. Login with your credentials</li>
-              <li>4. Select "File ITR" and choose appropriate ITR form</li>
-              <li>5. Use data from the PDF report to fill the online form</li>
-              <li>6. Choose the recommended tax regime from the report</li>
-            </ol>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="bg-slate-800/60 p-4 rounded-lg border border-slate-600/30">
+              <h4 className="text-slate-300 font-semibold mb-2">Salary Income</h4>
+              <p className="text-2xl font-bold text-white">₹{formatCurrency(income.salary)}</p>
+            </div>
+            
+            <div className="bg-slate-800/60 p-4 rounded-lg border border-slate-600/30">
+              <h4 className="text-slate-300 font-semibold mb-2">Business Income</h4>
+              <p className="text-2xl font-bold text-white">₹{formatCurrency(income.businessIncome)}</p>
+            </div>
+            
+            <div className="bg-slate-800/60 p-4 rounded-lg border border-slate-600/30">
+              <h4 className="text-slate-300 font-semibold mb-2">Other Income</h4>
+              <p className="text-2xl font-bold text-white">₹{formatCurrency(income.capitalGainsShort + income.capitalGainsLong + income.otherSources)}</p>
+            </div>
+          </div>
+          
+          <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-500/30">
+            <h4 className="text-slate-300 font-semibold text-lg mb-2">Total Annual Income</h4>
+            <p className="text-3xl font-bold text-white">₹{formatCurrency(totalIncome)}</p>
+            <p className="text-sm text-slate-400 mt-2">
+              This is your total income before deductions
+            </p>
           </div>
         </CardContent>
       </Card>
