@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -5,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, DollarSign, Target, Lightbulb, Calculator } from 'lucide-react';
 import { IncomeData, DeductionData, TaxResult } from '@/utils/taxCalculations';
+
 interface SmartInsightsProps {
   income: IncomeData;
   deductions: DeductionData;
@@ -12,6 +14,7 @@ interface SmartInsightsProps {
   oldRegimeResult: TaxResult;
   newRegimeResult: TaxResult;
 }
+
 export const SmartInsights: React.FC<SmartInsightsProps> = ({
   income,
   deductions,
@@ -22,7 +25,10 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-IN');
   };
-  const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
+
+  const totalIncome = income.salary + income.businessIncome + 
+                     income.capitalGains.reduce((sum, gain) => sum + gain.amount, 0) + 
+                     income.otherSources;
 
   // Smart analysis
   const getOptimizationOpportunities = () => {
@@ -69,8 +75,10 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
         priority: "medium"
       });
     }
+
     return opportunities.sort((a, b) => b.potentialSaving - a.potentialSaving);
   };
+
   const getTaxEfficiency = () => {
     const effectiveRate = oldRegimeResult.effectiveRate;
     if (effectiveRate < 5) return {
@@ -94,6 +102,7 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
       description: "High tax burden"
     };
   };
+
   const getFinancialHealth = () => {
     const savingsRate = (deductions.section80C + deductions.nps) / totalIncome * 100;
     if (savingsRate > 20) return {
@@ -113,11 +122,14 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
       color: "text-red-400"
     };
   };
+
   const opportunities = getOptimizationOpportunities();
   const taxEfficiency = getTaxEfficiency();
   const financialHealth = getFinancialHealth();
   const totalPotentialSavings = opportunities.reduce((sum, opp) => sum + opp.potentialSaving, 0);
-  return <div className="space-y-6">
+
+  return (
+    <div className="space-y-6">
       {/* Tax Efficiency Overview */}
       <Card className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border-slate-600/30 rounded-2xl backdrop-blur-sm">
         <CardHeader className="bg-slate-800">
@@ -166,16 +178,23 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {opportunities.length === 0 ? <div className="text-center py-8">
+          {opportunities.length === 0 ? (
+            <div className="text-center py-8">
               <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
               <h3 className="text-white text-lg font-semibold">Well Optimized!</h3>
               <p className="text-slate-400">Your tax planning looks good. Consider reviewing annually.</p>
-            </div> : opportunities.map((opportunity, index) => <div key={index} className="bg-slate-700/50 rounded-xl p-4 border border-slate-600/30">
+            </div>
+          ) : (
+            opportunities.map((opportunity, index) => (
+              <div key={index} className="bg-slate-700/50 rounded-xl p-4 border border-slate-600/30">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h4 className="text-white font-semibold">{opportunity.title}</h4>
-                      <Badge variant={opportunity.priority === 'high' ? 'destructive' : 'secondary'} className={opportunity.priority === 'high' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'}>
+                      <Badge 
+                        variant={opportunity.priority === 'high' ? 'destructive' : 'secondary'}
+                        className={opportunity.priority === 'high' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'}
+                      >
                         {opportunity.priority} priority
                       </Badge>
                     </div>
@@ -186,7 +205,9 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
                   </div>
                   <TrendingUp className="w-5 h-5 text-green-400 ml-4 flex-shrink-0" />
                 </div>
-              </div>)}
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -262,13 +283,14 @@ export const SmartInsights: React.FC<SmartInsightsProps> = ({
             
             <Alert className="bg-blue-500/10 border-blue-500/20">
               <Lightbulb className="h-4 w-4 text-blue-400" />
-              <div className="text-blue-200">
+              <AlertDescription className="text-blue-200">
                 <strong>Pro Tip:</strong> Start tax planning early in the financial year for maximum benefits. 
                 Consider SIP investments in ELSS funds for rupee cost averaging.
-              </div>
+              </AlertDescription>
             </Alert>
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };

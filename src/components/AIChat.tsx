@@ -109,7 +109,16 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'capitalShort':
         if (numericValue >= 0) {
-          setIncome({ ...income, capitalGainsShort: numericValue });
+          // Add short-term capital gain to the capitalGains array
+          const newCapitalGains = [...income.capitalGains];
+          if (numericValue > 0) {
+            newCapitalGains.push({
+              assetType: 'equity_shares',
+              isLongTerm: false,
+              amount: numericValue
+            });
+          }
+          setIncome({ ...income, capitalGains: newCapitalGains });
           addMessage(`Short-term capital gains: ₹${numericValue.toLocaleString('en-IN')}. Now enter your long-term capital gains amount (or 0 if none).`, 'ai');
           setCurrentStep('capitalLong');
         } else {
@@ -119,7 +128,16 @@ export const AIChat: React.FC<AIChatProps> = ({
 
       case 'capitalLong':
         if (numericValue >= 0) {
-          setIncome({ ...income, capitalGainsLong: numericValue });
+          // Add long-term capital gain to the capitalGains array
+          const newCapitalGains = [...income.capitalGains];
+          if (numericValue > 0) {
+            newCapitalGains.push({
+              assetType: 'equity_shares',
+              isLongTerm: true,
+              amount: numericValue
+            });
+          }
+          setIncome({ ...income, capitalGains: newCapitalGains });
           addMessage(`Long-term capital gains: ₹${numericValue.toLocaleString('en-IN')}. Finally, do you have income from other sources like interest, dividends etc.? Enter the amount (or 0 if none).`, 'ai');
           setCurrentStep('otherIncome');
         } else {
