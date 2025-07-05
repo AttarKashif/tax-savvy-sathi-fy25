@@ -8,7 +8,6 @@ import { CircleCheck, FileText, Calculator } from 'lucide-react';
 import { generateTaxComparisonPDF } from '@/utils/pdfGenerator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-
 interface TaxComparisonProps {
   oldRegimeResult: TaxResult;
   newRegimeResult: TaxResult;
@@ -24,7 +23,6 @@ interface TaxComparisonProps {
   deductions: DeductionData;
   taxpayerName: string;
 }
-
 export const TaxComparison: React.FC<TaxComparisonProps> = ({
   oldRegimeResult,
   newRegimeResult,
@@ -34,40 +32,35 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
   deductions,
   taxpayerName
 }) => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
 
   // Save calculation to database when component mounts
   useEffect(() => {
     const saveCalculation = async () => {
       if (!user) return;
-
       try {
-        await supabase
-          .from('tax_calculations')
-          .insert({
-            user_id: user.id,
-            taxpayer_name: taxpayerName,
-            age: age,
-            income_data: income as any,
-            deductions_data: deductions as any,
-            old_regime_tax: oldRegimeResult.totalTax,
-            new_regime_tax: newRegimeResult.totalTax,
-            recommended_regime: recommendation.recommendedRegime
-          });
-        
+        await supabase.from('tax_calculations').insert({
+          user_id: user.id,
+          taxpayer_name: taxpayerName,
+          age: age,
+          income_data: income as any,
+          deductions_data: deductions as any,
+          old_regime_tax: oldRegimeResult.totalTax,
+          new_regime_tax: newRegimeResult.totalTax,
+          recommended_regime: recommendation.recommendedRegime
+        });
         console.log('Calculation saved successfully');
       } catch (error) {
         console.error('Error saving calculation:', error);
       }
     };
-
     saveCalculation();
   }, [user, taxpayerName, age, income, deductions, oldRegimeResult.totalTax, newRegimeResult.totalTax, recommendation.recommendedRegime]);
-
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-IN');
   };
-
   const handleGeneratePDF = async () => {
     const pdfData = {
       income,
@@ -78,7 +71,6 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
       age,
       taxpayerName
     };
-    
     try {
       await generateTaxComparisonPDF(pdfData);
     } catch (error) {
@@ -86,38 +78,32 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
       alert('Error generating PDF report. Please try again.');
     }
   };
-
-  const chartData = [
-    {
-      regime: 'Old Regime',
-      tax: oldRegimeResult.totalTax,
-      fill: recommendation.recommendedRegime === 'old' ? '#22c55e' : '#94a3b8'
-    },
-    {
-      regime: 'New Regime',
-      tax: newRegimeResult.totalTax,
-      fill: recommendation.recommendedRegime === 'new' ? '#22c55e' : '#94a3b8'
-    }
-  ];
-
-  const pieData = [
-    { name: 'Tax Payable', value: recommendation.recommendedRegime === 'old' ? oldRegimeResult.totalTax : newRegimeResult.totalTax },
-    { name: 'After-tax Income', value: oldRegimeResult.grossIncome - (recommendation.recommendedRegime === 'old' ? oldRegimeResult.totalTax : newRegimeResult.totalTax) }
-  ];
-
+  const chartData = [{
+    regime: 'Old Regime',
+    tax: oldRegimeResult.totalTax,
+    fill: recommendation.recommendedRegime === 'old' ? '#22c55e' : '#94a3b8'
+  }, {
+    regime: 'New Regime',
+    tax: newRegimeResult.totalTax,
+    fill: recommendation.recommendedRegime === 'new' ? '#22c55e' : '#94a3b8'
+  }];
+  const pieData = [{
+    name: 'Tax Payable',
+    value: recommendation.recommendedRegime === 'old' ? oldRegimeResult.totalTax : newRegimeResult.totalTax
+  }, {
+    name: 'After-tax Income',
+    value: oldRegimeResult.grossIncome - (recommendation.recommendedRegime === 'old' ? oldRegimeResult.totalTax : newRegimeResult.totalTax)
+  }];
   const COLORS = ['#ef4444', '#22c55e'];
-
   const getAgeCategory = (age: number) => {
     if (age >= 80) return 'Super Senior Citizen (80+ years)';
     if (age >= 60) return 'Senior Citizen (60-79 years)';
     return 'Regular (Below 60 years)';
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Calculate Tax Button at Top */}
       <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20 backdrop-blur-sm">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 bg-slate-800">
           <div className="flex flex-col items-center gap-4">
             <div className="text-center">
               <h3 className="text-2xl font-bold text-white mb-2">Tax Calculation Complete</h3>
@@ -129,7 +115,7 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
 
       {/* PDF Generation Section at Top */}
       <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20 backdrop-blur-sm">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 bg-slate-800">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-white">Download Professional Report</h3>
@@ -137,11 +123,7 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
                 Get a comprehensive PDF report with detailed calculations and recommendations
               </p>
             </div>
-            <Button 
-              onClick={handleGeneratePDF}
-              size="lg"
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
-            >
+            <Button onClick={handleGeneratePDF} size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200">
               <FileText className="w-5 h-5 mr-2" />
               Generate PDF Report
             </Button>
@@ -151,7 +133,7 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
 
       {/* Recommendation Banner */}
       <Card className={`${recommendation.recommendedRegime === 'new' ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/20' : 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-500/20'} backdrop-blur-sm`}>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 bg-slate-800">
           <div className="flex items-center gap-3 mb-4">
             <CircleCheck className={`w-8 h-8 ${recommendation.recommendedRegime === 'new' ? 'text-green-400' : 'text-blue-400'}`} />
             <div>
@@ -191,12 +173,14 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
               <XAxis dataKey="regime" stroke="#94a3b8" />
-              <YAxis tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`} stroke="#94a3b8" />
-              <Tooltip 
-                formatter={(value) => [`₹${formatCurrency(Number(value))}`, 'Tax Amount']} 
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
-                labelStyle={{ color: '#f1f5f9' }}
-              />
+              <YAxis tickFormatter={value => `₹${(value / 1000).toFixed(0)}K`} stroke="#94a3b8" />
+              <Tooltip formatter={value => [`₹${formatCurrency(Number(value))}`, 'Tax Amount']} contentStyle={{
+              backgroundColor: '#1e293b',
+              border: '1px solid #334155',
+              borderRadius: '12px'
+            }} labelStyle={{
+              color: '#f1f5f9'
+            }} />
               <Bar dataKey="tax" fill="#8884d8" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -210,9 +194,7 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
           <CardHeader>
             <CardTitle className="flex items-center justify-between text-white">
               Old Tax Regime
-              {recommendation.recommendedRegime === 'old' && (
-                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Recommended</Badge>
-              )}
+              {recommendation.recommendedRegime === 'old' && <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Recommended</Badge>}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -265,9 +247,7 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
           <CardHeader>
             <CardTitle className="flex items-center justify-between text-white">
               New Tax Regime
-              {recommendation.recommendedRegime === 'new' && (
-                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Recommended</Badge>
-              )}
+              {recommendation.recommendedRegime === 'new' && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Recommended</Badge>}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -324,25 +304,19 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, value }) => `${name}: ₹${formatCurrency(value)}`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
+              <Pie data={pieData} cx="50%" cy="50%" labelLine={false} label={({
+              name,
+              value
+            }) => `${name}: ₹${formatCurrency(value)}`} outerRadius={80} fill="#8884d8" dataKey="value">
+                {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
               </Pie>
-              <Tooltip 
-                formatter={(value) => `₹${formatCurrency(Number(value))}`} 
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
-                labelStyle={{ color: '#f1f5f9' }}
-              />
+              <Tooltip formatter={value => `₹${formatCurrency(Number(value))}`} contentStyle={{
+              backgroundColor: '#1e293b',
+              border: '1px solid #334155',
+              borderRadius: '12px'
+            }} labelStyle={{
+              color: '#f1f5f9'
+            }} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
@@ -369,26 +343,21 @@ export const TaxComparison: React.FC<TaxComparisonProps> = ({
             <div>
               <h4 className="font-semibold mb-3 text-white">Key Benefits</h4>
               <ul className="space-y-2 text-sm">
-                {recommendation.recommendedRegime === 'new' ? (
-                  <>
+                {recommendation.recommendedRegime === 'new' ? <>
                     <li className="text-green-400">✅ Higher standard deduction (₹75,000)</li>
                     <li className="text-green-400">✅ Higher rebate limit (₹7 lakh)</li>
                     <li className="text-green-400">✅ Simplified tax structure</li>
                     <li className="text-green-400">✅ No complex deduction calculations</li>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <li className="text-blue-400">✅ Multiple deduction benefits</li>
                     <li className="text-blue-400">✅ Tax-saving investment options</li>
                     <li className="text-blue-400">✅ HRA and other allowances</li>
                     <li className="text-blue-400">✅ Lower tax with proper planning</li>
-                  </>
-                )}
+                  </>}
               </ul>
             </div>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
