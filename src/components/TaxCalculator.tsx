@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,7 +14,6 @@ import { TaxLibrary } from './TaxLibrary';
 import { SmartInsights } from './SmartInsights';
 import { useAuth } from '@/hooks/useAuth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
 export const TaxCalculator = () => {
   const {
     user,
@@ -57,13 +55,12 @@ export const TaxCalculator = () => {
   const [showResults, setShowResults] = useState(false);
   const [anomalies, setAnomalies] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-
   const handleIncomeUpdate = useCallback((newIncome: IncomeData) => {
     setIncome(newIncome);
     // Smart validation and anomaly detection
     const newAnomalies = [];
     const newSuggestions = [];
-    
+
     // Anomaly detection
     if (newIncome.salary > 1000000 && deductions.section80C < 100000) {
       newAnomalies.push("High salary detected but Section 80C investments seem low");
@@ -74,37 +71,28 @@ export const TaxCalculator = () => {
     if (newIncome.salary > 500000 && deductions.section80D === 0) {
       newSuggestions.push("Consider health insurance for Section 80D benefits");
     }
-    
     setAnomalies(newAnomalies);
     setSuggestions(newSuggestions);
   }, [deductions]);
-
   const handleDeductionsUpdate = useCallback((newDeductions: DeductionData) => {
     setDeductions(newDeductions);
   }, []);
-
   const handleAgeUpdate = useCallback((newAge: number) => {
     setAge(newAge);
   }, []);
-
   const handleTaxpayerNameUpdate = useCallback((newName: string) => {
     setTaxpayerName(newName);
   }, []);
-
   const oldRegimeResult = calculateOldRegimeTax(income, deductions, age);
   const newRegimeResult = calculateNewRegimeTax(income, deductions, age);
   const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
-
   const handleCalculate = useCallback(() => {
     setShowResults(true);
     setActiveTab('results');
   }, []);
-
   const totalIncome = income.salary + income.businessIncome + income.capitalGainsShort + income.capitalGainsLong + income.otherSources;
   const hasValidIncome = totalIncome > 0;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
       <div className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-xl">
         <div className="container mx-auto px-6 py-4">
@@ -133,34 +121,26 @@ export const TaxCalculator = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 rounded-sm">
         <div className="max-w-7xl mx-auto">
           {/* Smart Alerts */}
-          {anomalies.length > 0 && (
-            <Alert className="mb-6 bg-amber-500/10 border-amber-500/20">
+          {anomalies.length > 0 && <Alert className="mb-6 bg-amber-500/10 border-amber-500/20">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <AlertDescription className="text-amber-200">
                 <div className="space-y-1">
-                  {anomalies.map((anomaly, index) => (
-                    <div key={index}>• {anomaly}</div>
-                  ))}
+                  {anomalies.map((anomaly, index) => <div key={index}>• {anomaly}</div>)}
                 </div>
               </AlertDescription>
-            </Alert>
-          )}
+            </Alert>}
 
-          {suggestions.length > 0 && (
-            <Alert className="mb-6 bg-blue-500/10 border-blue-500/20">
+          {suggestions.length > 0 && <Alert className="mb-6 bg-blue-500/10 border-blue-500/20">
               <Lightbulb className="h-4 w-4 text-blue-400" />
               <AlertDescription className="text-blue-200">
                 <div className="space-y-1">
-                  {suggestions.map((suggestion, index) => (
-                    <div key={index}>💡 {suggestion}</div>
-                  ))}
+                  {suggestions.map((suggestion, index) => <div key={index}>💡 {suggestion}</div>)}
                 </div>
               </AlertDescription>
-            </Alert>
-          )}
+            </Alert>}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-6 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
@@ -235,6 +215,5 @@ export const TaxCalculator = () => {
           </Tabs>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
