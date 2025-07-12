@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,19 @@ interface Client {
   bank_name?: string;
   status: string;
   created_at: string;
+}
+
+interface ClientInsert {
+  client_name: string;
+  pan: string;
+  entity_type: string;
+  aadhaar?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  bank_account_number?: string;
+  bank_ifsc?: string;
+  bank_name?: string;
 }
 
 export const ClientManagement = () => {
@@ -59,7 +71,7 @@ export const ClientManagement = () => {
   });
 
   const addClientMutation = useMutation({
-    mutationFn: async (newClient: Partial<Client>) => {
+    mutationFn: async (newClient: ClientInsert) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -90,7 +102,7 @@ export const ClientManagement = () => {
   });
 
   const updateClientMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Client> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<ClientInsert> }) => {
       const { data, error } = await supabase
         .from('clients')
         .update(updates)
@@ -115,17 +127,17 @@ export const ClientManagement = () => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    const clientData = {
+    const clientData: ClientInsert = {
       client_name: formData.get('client_name') as string,
       pan: formData.get('pan') as string,
-      aadhaar: formData.get('aadhaar') as string || undefined,
       entity_type: formData.get('entity_type') as string,
-      email: formData.get('email') as string || undefined,
-      phone: formData.get('phone') as string || undefined,
-      address: formData.get('address') as string || undefined,
-      bank_account_number: formData.get('bank_account_number') as string || undefined,
-      bank_ifsc: formData.get('bank_ifsc') as string || undefined,
-      bank_name: formData.get('bank_name') as string || undefined,
+      aadhaar: (formData.get('aadhaar') as string) || undefined,
+      email: (formData.get('email') as string) || undefined,
+      phone: (formData.get('phone') as string) || undefined,
+      address: (formData.get('address') as string) || undefined,
+      bank_account_number: (formData.get('bank_account_number') as string) || undefined,
+      bank_ifsc: (formData.get('bank_ifsc') as string) || undefined,
+      bank_name: (formData.get('bank_name') as string) || undefined,
     };
 
     addClientMutation.mutate(clientData);
@@ -137,17 +149,17 @@ export const ClientManagement = () => {
 
     const formData = new FormData(event.currentTarget);
     
-    const updates = {
+    const updates: Partial<ClientInsert> = {
       client_name: formData.get('client_name') as string,
       pan: formData.get('pan') as string,
-      aadhaar: formData.get('aadhaar') as string || undefined,
       entity_type: formData.get('entity_type') as string,
-      email: formData.get('email') as string || undefined,
-      phone: formData.get('phone') as string || undefined,
-      address: formData.get('address') as string || undefined,
-      bank_account_number: formData.get('bank_account_number') as string || undefined,
-      bank_ifsc: formData.get('bank_ifsc') as string || undefined,
-      bank_name: formData.get('bank_name') as string || undefined,
+      aadhaar: (formData.get('aadhaar') as string) || undefined,
+      email: (formData.get('email') as string) || undefined,
+      phone: (formData.get('phone') as string) || undefined,
+      address: (formData.get('address') as string) || undefined,
+      bank_account_number: (formData.get('bank_account_number') as string) || undefined,
+      bank_ifsc: (formData.get('bank_ifsc') as string) || undefined,
+      bank_name: (formData.get('bank_name') as string) || undefined,
     };
 
     updateClientMutation.mutate({ id: selectedClient.id, updates });

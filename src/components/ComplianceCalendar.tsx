@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,15 @@ interface Compliance {
   status: string;
   client_id?: string;
   clients?: { client_name: string };
+}
+
+interface ComplianceInsert {
+  title: string;
+  compliance_type: string;
+  due_date: string;
+  description?: string;
+  priority?: string;
+  client_id?: string;
 }
 
 export const ComplianceCalendar = () => {
@@ -74,7 +82,7 @@ export const ComplianceCalendar = () => {
   });
 
   const addComplianceMutation = useMutation({
-    mutationFn: async (newCompliance: Partial<Compliance>) => {
+    mutationFn: async (newCompliance: ComplianceInsert) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -129,13 +137,13 @@ export const ComplianceCalendar = () => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    const complianceData = {
+    const complianceData: ComplianceInsert = {
       title: formData.get('title') as string,
-      description: formData.get('description') as string || undefined,
-      due_date: formData.get('due_date') as string,
       compliance_type: formData.get('compliance_type') as string,
+      due_date: formData.get('due_date') as string,
+      description: (formData.get('description') as string) || undefined,
       priority: formData.get('priority') as string,
-      client_id: formData.get('client_id') as string || undefined,
+      client_id: (formData.get('client_id') as string) || undefined,
     };
 
     addComplianceMutation.mutate(complianceData);

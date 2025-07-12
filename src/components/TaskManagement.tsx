@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,16 @@ interface Task {
   completed_at?: string;
   clients?: { client_name: string };
   staff?: { staff_name: string };
+}
+
+interface TaskInsert {
+  title: string;
+  task_type: string;
+  description?: string;
+  priority?: string;
+  client_id?: string;
+  assigned_to?: string;
+  due_date?: string;
 }
 
 export const TaskManagement = () => {
@@ -97,7 +106,7 @@ export const TaskManagement = () => {
   });
 
   const addTaskMutation = useMutation({
-    mutationFn: async (newTask: Partial<Task>) => {
+    mutationFn: async (newTask: TaskInsert) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -157,14 +166,14 @@ export const TaskManagement = () => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    const taskData = {
+    const taskData: TaskInsert = {
       title: formData.get('title') as string,
-      description: formData.get('description') as string || undefined,
       task_type: formData.get('task_type') as string,
+      description: (formData.get('description') as string) || undefined,
       priority: formData.get('priority') as string,
-      client_id: formData.get('client_id') as string || undefined,
-      assigned_to: formData.get('assigned_to') as string || undefined,
-      due_date: formData.get('due_date') as string || undefined,
+      client_id: (formData.get('client_id') as string) || undefined,
+      assigned_to: (formData.get('assigned_to') as string) || undefined,
+      due_date: (formData.get('due_date') as string) || undefined,
     };
 
     addTaskMutation.mutate(taskData);
