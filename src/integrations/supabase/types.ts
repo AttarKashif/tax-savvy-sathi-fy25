@@ -14,6 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          aadhaar: string | null
+          address: string | null
+          bank_account_number: string | null
+          bank_ifsc: string | null
+          bank_name: string | null
+          client_name: string
+          created_at: string
+          dsc_details: Json | null
+          email: string | null
+          entity_type: string
+          id: string
+          pan: string
+          phone: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aadhaar?: string | null
+          address?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
+          client_name: string
+          created_at?: string
+          dsc_details?: Json | null
+          email?: string | null
+          entity_type: string
+          id?: string
+          pan: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aadhaar?: string | null
+          address?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
+          client_name?: string
+          created_at?: string
+          dsc_details?: Json | null
+          email?: string | null
+          entity_type?: string
+          id?: string
+          pan?: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      compliance_calendar: {
+        Row: {
+          client_id: string | null
+          compliance_type: string
+          created_at: string
+          description: string | null
+          due_date: string
+          id: string
+          priority: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          compliance_type: string
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: string
+          priority?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          compliance_type?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          priority?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_calendar_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notices: {
+        Row: {
+          attachments: Json | null
+          client_id: string
+          created_at: string
+          description: string | null
+          id: string
+          notice_date: string | null
+          notice_number: string | null
+          notice_type: string
+          response_due_date: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          client_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          notice_date?: string | null
+          notice_number?: string | null
+          notice_type: string
+          response_due_date?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          notice_date?: string | null
+          notice_number?: string | null
+          notice_type?: string
+          response_due_date?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -40,6 +200,152 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      refunds: {
+        Row: {
+          acknowledgment_number: string | null
+          assessment_year: string
+          client_id: string
+          created_at: string
+          id: string
+          refund_amount: number | null
+          refund_date: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acknowledgment_number?: string | null
+          assessment_year: string
+          client_id: string
+          created_at?: string
+          id?: string
+          refund_amount?: number | null
+          refund_date?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acknowledgment_number?: string | null
+          assessment_year?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          refund_amount?: number | null
+          refund_date?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          permissions: Json | null
+          role: string
+          staff_name: string
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          permissions?: Json | null
+          role: string
+          staff_name: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          permissions?: Json | null
+          role?: string
+          staff_name?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          client_id: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string | null
+          status: string | null
+          task_type: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          task_type: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          task_type?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tax_calculations: {
         Row: {
@@ -82,6 +388,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tds_challans: {
+        Row: {
+          amount: number
+          bsr_code: string | null
+          challan_number: string
+          client_id: string | null
+          created_at: string
+          id: string
+          payment_date: string
+          status: string | null
+          tds_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          bsr_code?: string | null
+          challan_number: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          payment_date: string
+          status?: string | null
+          tds_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          bsr_code?: string | null
+          challan_number?: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          payment_date?: string
+          status?: string | null
+          tds_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tds_challans_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

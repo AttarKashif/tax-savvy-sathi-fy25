@@ -3,12 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { TaxCalculator } from "@/components/TaxCalculator";
+import { MainApp } from "@/components/MainApp";
 import { AuthPage } from "@/components/AuthPage";
 import { AccessPending } from "@/components/AccessPending";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -31,14 +29,7 @@ const AppContent = () => {
     return <AccessPending onSignOut={signOut} userEmail={user.email || ''} />;
   }
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<TaxCalculator />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <MainApp />;
 };
 
 const App = () => (
