@@ -6,7 +6,6 @@ import { ClientManagement } from './ClientManagement';
 import { ComplianceCalendar } from './ComplianceCalendar';
 import { TaskManagement } from './TaskManagement';
 import { TaxCalculator } from './TaxCalculator';
-import { AIChat } from './AIChat';
 import { TaxLibrary } from './TaxLibrary';
 
 export const MainApp = () => {
@@ -24,8 +23,6 @@ export const MainApp = () => {
         return <TaskManagement />;
       case 'calculator':
         return <TaxCalculator />;
-      case 'chat':
-        return <AIChat />;
       case 'library':
         return <TaxLibrary />;
       default:

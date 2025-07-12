@@ -103,7 +103,7 @@ export const TaskManagement = () => {
 
       const { data, error } = await supabase
         .from('tasks')
-        .insert([{ ...newTask, user_id: user.id }])
+        .insert({ ...newTask, user_id: user.id })
         .select()
         .single();
 

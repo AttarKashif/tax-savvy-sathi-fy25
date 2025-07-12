@@ -65,7 +65,7 @@ export const ClientManagement = () => {
 
       const { data, error } = await supabase
         .from('clients')
-        .insert([{ ...newClient, user_id: user.id }])
+        .insert({ ...newClient, user_id: user.id })
         .select()
         .single();
 

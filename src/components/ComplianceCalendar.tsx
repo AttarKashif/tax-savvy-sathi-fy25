@@ -80,7 +80,7 @@ export const ComplianceCalendar = () => {
 
       const { data, error } = await supabase
         .from('compliance_calendar')
-        .insert([{ ...newCompliance, user_id: user.id }])
+        .insert({ ...newCompliance, user_id: user.id })
         .select()
         .single();
 
