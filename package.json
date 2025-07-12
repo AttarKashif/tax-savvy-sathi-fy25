@@ -1,14 +1,17 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "tax-sathi-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Tax Sathi - Complete Tax Management Solution",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "npm run dev",
+    "demo": "VITE_DEMO_MODE=true npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -84,5 +87,20 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
-  }
+  },
+  "keywords": [
+    "tax",
+    "accounting",
+    "finance",
+    "tax-calculator",
+    "income-tax",
+    "gst",
+    "compliance",
+    "audit",
+    "react",
+    "typescript",
+    "vite"
+  ],
+  "author": "Tax Sathi Team",
+  "license": "MIT"
 }

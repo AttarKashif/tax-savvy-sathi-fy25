@@ -6,17 +6,24 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
-    port: 8080,
+    host: true,
+    port: 5173,
+    strictPort: false,
+    open: true,
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  define: {
+    // Enable demo mode by default for localhost
+    'import.meta.env.VITE_DEMO_MODE': JSON.stringify(
+      process.env.VITE_DEMO_MODE || 'true'
+    ),
   },
 }));

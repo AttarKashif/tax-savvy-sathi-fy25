@@ -10,13 +10,24 @@ import { AccessPending } from "@/components/AccessPending";
 
 const queryClient = new QueryClient();
 
+// Enable demo mode for local development without authentication
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || window.location.hostname === 'localhost';
+
 const AppContent = () => {
   const { user, profile, loading, signOut, isApproved } = useAuth();
 
+  // In demo mode, skip authentication and go directly to main app
+  if (DEMO_MODE) {
+    return <MainApp />;
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }

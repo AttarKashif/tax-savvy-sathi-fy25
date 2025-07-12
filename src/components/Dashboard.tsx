@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Users, FileText, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { mockStats, mockTasks, mockComplianceCalendar, createMockQuery } from '@/utils/mockData';
 
 interface DashboardStats {
   totalClients: number;
@@ -16,10 +17,17 @@ interface DashboardStats {
   overdueCompliances: number;
 }
 
+// Check if we're in demo mode
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || window.location.hostname === 'localhost';
+
 export const Dashboard = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async (): Promise<DashboardStats> => {
+      if (DEMO_MODE) {
+        return mockStats;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -61,6 +69,10 @@ export const Dashboard = () => {
   const { data: recentTasks } = useQuery({
     queryKey: ['recent-tasks'],
     queryFn: async () => {
+      if (DEMO_MODE) {
+        return mockTasks.slice(0, 5);
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -82,6 +94,18 @@ export const Dashboard = () => {
   const { data: upcomingCompliances } = useQuery({
     queryKey: ['upcoming-compliances'],
     queryFn: async () => {
+      if (DEMO_MODE) {
+        const today = new Date();
+        const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        return mockComplianceCalendar.filter(c => {
+          const dueDate = new Date(c.due_date);
+          return c.status === 'Pending' && 
+                 dueDate >= today && 
+                 dueDate <= nextWeek;
+        });
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -119,10 +143,20 @@ export const Dashboard = () => {
     <div className="uniform-page-container">
       <div className="uniform-content-wrapper">
         <div className="mb-8">
-          <h1 className="uniform-section-title">Dashboard</h1>
-          <p className="uniform-section-subtitle">
-            Welcome to your CA Practice Management System
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="uniform-section-title">Dashboard</h1>
+              <p className="uniform-section-subtitle">
+                Welcome to your CA Practice Management System
+                {DEMO_MODE && <span className="text-primary font-semibold"> (Demo Mode)</span>}
+              </p>
+            </div>
+            {DEMO_MODE && (
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                Demo Mode Active
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Stats Cards */}
