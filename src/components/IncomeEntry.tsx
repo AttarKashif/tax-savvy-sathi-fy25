@@ -52,111 +52,108 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
   };
 
   const validationAlerts = getValidationAlerts();
-  const inputClassName = "bg-slate-700/50 border-slate-600/40 text-white rounded-2xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 transition-all duration-200 hover:bg-slate-700/70";
-  const labelClassName = "text-slate-200 font-medium text-sm";
-  const cardClassName = "bg-slate-800/50 border-slate-600/30 backdrop-blur-sm rounded-2xl shadow-lg hover:bg-slate-800/60 transition-all duration-200";
 
   return (
-    <div className="space-y-6">
+    <div className="uniform-tab-content">
       {/* Validation Alerts */}
       {validationAlerts.map((alert, index) => (
-        <Alert key={index} className={`${alert.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-blue-500/10 border-blue-500/20'} rounded-2xl`}>
+        <Alert key={index} className={`mb-4 ${alert.type === 'warning' ? 'uniform-alert-warning' : 'uniform-alert-info'}`}>
           {alert.type === 'warning' ? (
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertTriangle className="h-4 w-4" />
           ) : (
-            <Info className="h-4 w-4 text-blue-400" />
+            <Info className="h-4 w-4" />
           )}
-          <AlertDescription className={alert.type === 'warning' ? 'text-amber-200' : 'text-blue-200'}>
+          <AlertDescription>
             {alert.message}
           </AlertDescription>
         </Alert>
       ))}
 
       {/* Personal Information */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
-            <Briefcase className="w-6 h-6" />
+      <Card className="uniform-card">
+        <CardHeader className="uniform-card-header">
+          <CardTitle className="flex items-center gap-2">
+            <Briefcase className="w-5 h-5" />
             Personal Information
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label className={labelClassName}>Taxpayer Name</Label>
+        <CardContent className="uniform-card-content">
+          <div className="uniform-input-group">
+            <Label className="uniform-input-label">Taxpayer Name</Label>
             <Input
               type="text"
               value={taxpayerName}
               onChange={(e) => setTaxpayerName(e.target.value)}
               placeholder="Enter your full name"
-              className={inputClassName}
+              className="uniform-focus-input"
             />
-            <p className="text-xs text-slate-400">This will appear on your tax calculation report</p>
+            <p className="text-xs text-muted-foreground">This will appear on your tax calculation report</p>
           </div>
         </CardContent>
       </Card>
 
       {/* Salary Income */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
-            <Building className="w-6 h-6" />
+      <Card className="uniform-card">
+        <CardHeader className="uniform-card-header">
+          <CardTitle className="flex items-center gap-2">
+            <Building className="w-5 h-5" />
             Salary Income
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className={labelClassName}>Annual Salary (CTC)</Label>
+        <CardContent className="uniform-card-content">
+          <div className="uniform-form-grid">
+            <div className="uniform-input-group">
+              <Label className="uniform-input-label">Annual Salary (CTC)</Label>
               <Input
                 type="number"
                 value={income.salary || ''}
                 onChange={(e) => handleIncomeChange('salary', Number(e.target.value) || 0)}
                 placeholder="Enter your annual CTC"
-                className={inputClassName}
+                className="uniform-focus-input"
               />
-              <p className="text-xs text-slate-400">Complete Cost to Company including all allowances</p>
+              <p className="text-xs text-muted-foreground">Complete Cost to Company including all allowances</p>
             </div>
 
-            <div className="space-y-2">
-              <Label className={labelClassName}>Basic Salary (Annual)</Label>
+            <div className="uniform-input-group">
+              <Label className="uniform-input-label">Basic Salary (Annual)</Label>
               <Input
                 type="number"
                 value={income.basicSalary || ''}
                 onChange={(e) => handleIncomeChange('basicSalary', Number(e.target.value) || 0)}
                 placeholder="Enter your basic salary"
-                className={inputClassName}
+                className="uniform-focus-input"
               />
-              <p className="text-xs text-slate-400">Basic salary component for HRA calculation (typically 40-50% of CTC)</p>
+              <p className="text-xs text-muted-foreground">Basic salary component for HRA calculation (typically 40-50% of CTC)</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Business & Professional Income */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
-            <Calculator className="w-6 h-6" />
+      <Card className="uniform-card">
+        <CardHeader className="uniform-card-header">
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="w-5 h-5" />
             Business & Professional Income
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label className={labelClassName}>Business/Professional Income</Label>
+        <CardContent className="uniform-card-content">
+          <div className="uniform-input-group">
+            <Label className="uniform-input-label">Business/Professional Income</Label>
             <Input
               type="number"
               value={income.businessIncome || ''}
               onChange={(e) => handleIncomeChange('businessIncome', Number(e.target.value) || 0)}
               placeholder="Enter net business income"
-              className={inputClassName}
+              className="uniform-focus-input"
             />
-            <p className="text-xs text-slate-400">Net profit from business or professional services (after all business expenses)</p>
+            <p className="text-xs text-muted-foreground">Net profit from business or professional services (after all business expenses)</p>
           </div>
           
           {income.businessIncome > 0 && (
-            <Alert className="bg-blue-500/10 border-blue-500/20 rounded-2xl">
-              <Info className="h-4 w-4 text-blue-400" />
-              <AlertDescription className="text-blue-200">
+            <Alert className="uniform-alert-info mt-4">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
                 Business income is taxed as per your slab rate. Consider business deductions and GST implications.
               </AlertDescription>
             </Alert>
@@ -165,30 +162,30 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
       </Card>
 
       {/* Other Income */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle className="text-xl text-slate-200 flex items-center gap-2">
-            <DollarSign className="w-6 h-6" />
+      <Card className="uniform-card">
+        <CardHeader className="uniform-card-header">
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="w-5 h-5" />
             Other Income Sources
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label className={labelClassName}>Other Sources Income</Label>
+        <CardContent className="uniform-card-content">
+          <div className="uniform-input-group">
+            <Label className="uniform-input-label">Other Sources Income</Label>
             <Input
               type="number"
               value={income.otherSources || ''}
               onChange={(e) => handleIncomeChange('otherSources', Number(e.target.value) || 0)}
               placeholder="Interest, dividends, rental etc."
-              className={inputClassName}
+              className="uniform-focus-input"
             />
-            <p className="text-xs text-slate-400">Interest from savings/FD, dividends, rental income, freelance income, etc.</p>
+            <p className="text-xs text-muted-foreground">Interest from savings/FD, dividends, rental income, freelance income, etc.</p>
           </div>
           
           {income.otherSources > 50000 && (
-            <Alert className="bg-green-500/10 border-green-500/20 rounded-2xl">
-              <Info className="h-4 w-4 text-green-400" />
-              <AlertDescription className="text-green-200">
+            <Alert className="uniform-alert-success mt-4">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
                 Consider Section 80TTA deduction (up to ₹10,000) on savings account interest.
               </AlertDescription>
             </Alert>
@@ -197,40 +194,40 @@ export const IncomeEntry: React.FC<IncomeEntryProps> = ({
       </Card>
 
       {/* Income Summary */}
-      <Card className="bg-gradient-to-r from-slate-800/60 to-slate-700/60 border-slate-600/50 backdrop-blur-sm rounded-2xl shadow-xl">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Calculator className="w-6 h-6 text-slate-400" />
-            <h3 className="text-xl font-bold text-slate-200">Income Summary</h3>
+      <Card className="uniform-card border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+        <CardContent className="uniform-card-content">
+          <div className="flex items-center gap-3 mb-6">
+            <Calculator className="w-6 h-6 text-primary" />
+            <h3 className="text-xl font-bold text-foreground">Income Summary</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <div className="bg-slate-800/60 p-4 rounded-2xl border border-slate-600/30 text-center">
-              <h4 className="text-slate-300 font-semibold mb-2">Salary</h4>
-              <p className="text-lg font-bold text-white">₹{formatCurrency(income.salary)}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="uniform-card p-4 text-center uniform-hover-card">
+              <h4 className="text-sm font-semibold text-muted-foreground mb-2">Salary</h4>
+              <p className="text-lg font-bold text-foreground">₹{formatCurrency(income.salary)}</p>
             </div>
             
-            <div className="bg-slate-800/60 p-4 rounded-2xl border border-slate-600/30 text-center">
-              <h4 className="text-slate-300 font-semibold mb-2">Business</h4>
-              <p className="text-lg font-bold text-white">₹{formatCurrency(income.businessIncome)}</p>
+            <div className="uniform-card p-4 text-center uniform-hover-card">
+              <h4 className="text-sm font-semibold text-muted-foreground mb-2">Business</h4>
+              <p className="text-lg font-bold text-foreground">₹{formatCurrency(income.businessIncome)}</p>
             </div>
             
-            <div className="bg-slate-800/60 p-4 rounded-2xl border border-slate-600/30 text-center">
-              <h4 className="text-slate-300 font-semibold mb-2">Capital Gains</h4>
-              <p className="text-lg font-bold text-white">₹{formatCurrency(totalCapitalGains)}</p>
-              <p className="text-xs text-slate-400">{income.capitalGains.length} asset{income.capitalGains.length !== 1 ? 's' : ''}</p>
+            <div className="uniform-card p-4 text-center uniform-hover-card">
+              <h4 className="text-sm font-semibold text-muted-foreground mb-2">Capital Gains</h4>
+              <p className="text-lg font-bold text-foreground">₹{formatCurrency(totalCapitalGains)}</p>
+              <p className="text-xs text-muted-foreground">{income.capitalGains.length} asset{income.capitalGains.length !== 1 ? 's' : ''}</p>
             </div>
             
-            <div className="bg-slate-800/60 p-4 rounded-2xl border border-slate-600/30 text-center">
-              <h4 className="text-slate-300 font-semibold mb-2">Other Sources</h4>
-              <p className="text-lg font-bold text-white">₹{formatCurrency(income.otherSources)}</p>
+            <div className="uniform-card p-4 text-center uniform-hover-card">
+              <h4 className="text-sm font-semibold text-muted-foreground mb-2">Other Sources</h4>
+              <p className="text-lg font-bold text-foreground">₹{formatCurrency(income.otherSources)}</p>
             </div>
           </div>
           
-          <div className="bg-gradient-to-r from-slate-700/60 to-slate-600/60 p-4 rounded-2xl border border-slate-500/30">
-            <h4 className="text-slate-300 font-semibold text-lg mb-2">Total Annual Income</h4>
-            <p className="text-3xl font-bold text-white">₹{formatCurrency(totalIncome)}</p>
-            <p className="text-sm text-slate-400 mt-2">
+          <div className="uniform-card bg-gradient-to-r from-primary/10 to-primary/5 p-6 border-primary/30">
+            <h4 className="text-lg font-semibold text-foreground mb-2">Total Annual Income</h4>
+            <p className="text-3xl font-bold text-primary">₹{formatCurrency(totalIncome)}</p>
+            <p className="text-sm text-muted-foreground mt-2">
               This is your total income before deductions and tax calculations
             </p>
           </div>

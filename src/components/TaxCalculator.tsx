@@ -137,186 +137,185 @@ export const TaxCalculator = () => {
   const hasValidIncome = totalIncome > 0;
 
   return (
-    <div className="h-full bg-background">
-      <div className="p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Calculator className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">Tax Calculator</h1>
-            </div>
-            <p className="text-muted-foreground">Calculate income tax for FY 2024-25 with AI-powered insights</p>
+    <div className="uniform-page-container">
+      <div className="uniform-content-wrapper">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Calculator className="w-6 h-6 text-primary" />
+            <h1 className="uniform-section-title">Tax Calculator</h1>
           </div>
+          <p className="uniform-section-subtitle">Calculate income tax for FY 2024-25 with AI-powered insights</p>
+        </div>
 
-          {/* Smart Alerts */}
-          {anomalies.length > 0 && (
-            <Alert className="mb-6 border-orange-200 bg-orange-50">
-              <AlertDescription className="text-orange-800">
-                <div className="space-y-1">
-                  {anomalies.map((anomaly, index) => (
-                    <div key={index}>⚠️ {anomaly}</div>
-                  ))}
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Smart Alerts */}
+        {anomalies.length > 0 && (
+          <Alert className="mb-6 uniform-alert-warning">
+            <AlertDescription>
+              <div className="space-y-1">
+                {anomalies.map((anomaly, index) => (
+                  <div key={index}>⚠️ {anomaly}</div>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {suggestions.length > 0 && (
-            <Alert className="mb-6 border-blue-200 bg-blue-50">
-              <AlertDescription className="text-blue-800">
-                <div className="space-y-1">
-                  {suggestions.map((suggestion, index) => (
-                    <div key={index}>💡 {suggestion}</div>
-                  ))}
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
+        {suggestions.length > 0 && (
+          <Alert className="mb-6 uniform-alert-info">
+            <AlertDescription>
+              <div className="space-y-1">
+                {suggestions.map((suggestion, index) => (
+                  <div key={index}>💡 {suggestion}</div>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-9 mb-8 bg-muted p-1">
-              <TabsTrigger value="income" className="flex items-center gap-2">
-                <Calculator className="w-4 h-4" />
-                Income
-              </TabsTrigger>
-              <TabsTrigger value="house-property" className="flex items-center gap-2">
-                <Home className="w-4 h-4" />
-                Property
-              </TabsTrigger>
-              <TabsTrigger value="capital-gains" className="flex items-center gap-2">
-                <Calculator className="w-4 h-4" />
-                Capital Gains
-              </TabsTrigger>
-              <TabsTrigger value="deductions" className="flex items-center gap-2">
-                <Calculator className="w-4 h-4" />
-                Deductions
-              </TabsTrigger>
-              <TabsTrigger value="tds-tcs" className="flex items-center gap-2">
-                <Receipt className="w-4 h-4" />
-                TDS/TCS
-              </TabsTrigger>
-              <TabsTrigger value="losses" className="flex items-center gap-2">
-                <TrendingDown className="w-4 h-4" />
-                Losses
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4" />
-                Insights
-              </TabsTrigger>
-              <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2">
-                <ChartBar className="w-4 h-4" />
-                Results
-              </TabsTrigger>
-              <TabsTrigger value="help" className="flex items-center gap-2">
-                <HelpCircle className="w-4 h-4" />
-                Help
-              </TabsTrigger>
-            </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-9 mb-8 bg-muted p-1">
+            <TabsTrigger value="income" className="flex items-center gap-2">
+              <Calculator className="w-4 h-4" />
+              Income
+            </TabsTrigger>
+            <TabsTrigger value="house-property" className="flex items-center gap-2">
+              <Home className="w-4 h-4" />
+              Property
+            </TabsTrigger>
+            <TabsTrigger value="capital-gains" className="flex items-center gap-2">
+              <Calculator className="w-4 h-4" />
+              Capital Gains
+            </TabsTrigger>
+            <TabsTrigger value="deductions" className="flex items-center gap-2">
+              <Calculator className="w-4 h-4" />
+              Deductions
+            </TabsTrigger>
+            <TabsTrigger value="tds-tcs" className="flex items-center gap-2">
+              <Receipt className="w-4 h-4" />
+              TDS/TCS
+            </TabsTrigger>
+            <TabsTrigger value="losses" className="flex items-center gap-2">
+              <TrendingDown className="w-4 h-4" />
+              Losses
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="flex items-center gap-2">
+              <Lightbulb className="w-4 h-4" />
+              Insights
+            </TabsTrigger>
+            <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2">
+              <ChartBar className="w-4 h-4" />
+              Results
+            </TabsTrigger>
+            <TabsTrigger value="help" className="flex items-center gap-2">
+              <HelpCircle className="w-4 h-4" />
+              Help
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="income" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Calculator className="w-5 h-5" />
-                    Personal & Income Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="age">Age</Label>
-                      <Input
-                        id="age"
-                        type="number"
-                        value={age || ''}
-                        onChange={(e) => handleAgeUpdate(Number(e.target.value) || 0)}
-                        min="18"
-                        max="100"
-                        placeholder="Enter your age"
-                      />
-                    </div>
+          <TabsContent value="income" className="uniform-tab-content">
+            <Card className="uniform-card">
+              <CardHeader className="uniform-card-header">
+                <CardTitle className="flex items-center gap-3">
+                  <Calculator className="w-5 h-5" />
+                  Personal & Income Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="uniform-card-content">
+                <div className="uniform-form-grid mb-6">
+                  <div className="uniform-input-group">
+                    <Label htmlFor="age" className="uniform-input-label">Age</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      value={age || ''}
+                      onChange={(e) => handleAgeUpdate(Number(e.target.value) || 0)}
+                      min="18"
+                      max="100"
+                      placeholder="Enter your age"
+                      className="uniform-focus-input"
+                    />
                   </div>
-                  
-                  <IncomeEntry 
-                    income={income} 
-                    setIncome={handleIncomeUpdate} 
-                    taxpayerName={taxpayerName} 
-                    setTaxpayerName={handleTaxpayerNameUpdate} 
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
+                
+                <IncomeEntry 
+                  income={income} 
+                  setIncome={handleIncomeUpdate} 
+                  taxpayerName={taxpayerName} 
+                  setTaxpayerName={handleTaxpayerNameUpdate} 
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="house-property" className="space-y-6">
-              <HousePropertyEntry 
-                houseProperty={income.houseProperty} 
-                setHouseProperty={(data) => setIncome({...income, houseProperty: data})} 
-              />
-            </TabsContent>
+          <TabsContent value="house-property" className="uniform-tab-content">
+            <HousePropertyEntry 
+              houseProperty={income.houseProperty} 
+              setHouseProperty={(data) => setIncome({...income, houseProperty: data})} 
+            />
+          </TabsContent>
 
-            <TabsContent value="capital-gains" className="space-y-6">
-              <CapitalGainsEntry 
-                capitalGains={income.capitalGains} 
-                setCapitalGains={(gains) => setIncome({...income, capitalGains: gains})} 
-              />
-            </TabsContent>
+          <TabsContent value="capital-gains" className="uniform-tab-content">
+            <CapitalGainsEntry 
+              capitalGains={income.capitalGains} 
+              setCapitalGains={(gains) => setIncome({...income, capitalGains: gains})} 
+            />
+          </TabsContent>
 
-            <TabsContent value="deductions" className="space-y-6">
-              <DeductionEntry 
-                deductions={deductions} 
-                setDeductions={handleDeductionsUpdate} 
-                income={income} 
-                onCalculate={handleCalculate} 
-                hasValidIncome={hasValidIncome} 
-                age={age} 
-              />
-            </TabsContent>
+          <TabsContent value="deductions" className="uniform-tab-content">
+            <DeductionEntry 
+              deductions={deductions} 
+              setDeductions={handleDeductionsUpdate} 
+              income={income} 
+              onCalculate={handleCalculate} 
+              hasValidIncome={hasValidIncome} 
+              age={age} 
+            />
+          </TabsContent>
 
-            <TabsContent value="tds-tcs" className="space-y-6">
-              <TDSTCSEntry 
-                tdsData={tdsData} 
-                setTDSData={setTDSData}
-                tcsData={tcsData}
-                setTCSData={setTCSData}
-              />
-            </TabsContent>
+          <TabsContent value="tds-tcs" className="uniform-tab-content">
+            <TDSTCSEntry 
+              tdsData={tdsData} 
+              setTDSData={setTDSData}
+              tcsData={tcsData}
+              setTCSData={setTCSData}
+            />
+          </TabsContent>
 
-            <TabsContent value="losses" className="space-y-6">
-              <CarryForwardLossEntry 
-                carryForwardLosses={carryForwardLosses} 
-                setCarryForwardLosses={setCarryForwardLosses} 
-              />
-            </TabsContent>
+          <TabsContent value="losses" className="uniform-tab-content">
+            <CarryForwardLossEntry 
+              carryForwardLosses={carryForwardLosses} 
+              setCarryForwardLosses={setCarryForwardLosses} 
+            />
+          </TabsContent>
 
-            <TabsContent value="insights" className="space-y-6">
-              <SmartInsights 
-                income={income} 
-                deductions={deductions} 
-                age={age} 
+          <TabsContent value="insights" className="uniform-tab-content">
+            <SmartInsights 
+              income={income} 
+              deductions={deductions} 
+              age={age} 
+              oldRegimeResult={oldRegimeResult} 
+              newRegimeResult={newRegimeResult} 
+            />
+          </TabsContent>
+
+          <TabsContent value="results" className="uniform-tab-content">
+            {showResults && hasValidIncome && (
+              <TaxComparison 
                 oldRegimeResult={oldRegimeResult} 
                 newRegimeResult={newRegimeResult} 
+                recommendation={recommendation} 
+                age={age} 
+                income={income} 
+                deductions={deductions} 
+                taxpayerName={taxpayerName} 
               />
-            </TabsContent>
+            )}
+          </TabsContent>
 
-            <TabsContent value="results" className="space-y-6">
-              {showResults && hasValidIncome && (
-                <TaxComparison 
-                  oldRegimeResult={oldRegimeResult} 
-                  newRegimeResult={newRegimeResult} 
-                  recommendation={recommendation} 
-                  age={age} 
-                  income={income} 
-                  deductions={deductions} 
-                  taxpayerName={taxpayerName} 
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="help" className="space-y-6">
-              <HelpManual />
-            </TabsContent>
-          </Tabs>
-        </div>
+          <TabsContent value="help" className="uniform-tab-content">
+            <HelpManual />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -106,156 +106,174 @@ export const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="uniform-page-container flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading dashboard...</p>
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <div className="text-sm text-muted-foreground">
-          Welcome to your CA Practice Management System
+    <div className="uniform-page-container">
+      <div className="uniform-content-wrapper">
+        <div className="mb-8">
+          <h1 className="uniform-section-title">Dashboard</h1>
+          <p className="uniform-section-subtitle">
+            Welcome to your CA Practice Management System
+          </p>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalClients || 0}</div>
-            <p className="text-xs text-muted-foreground">Active client base</p>
-          </CardContent>
-        </Card>
+        {/* Stats Cards */}
+        <div className="uniform-stats-grid mb-8">
+          <Card className="uniform-card uniform-hover-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                Total Clients
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="text-2xl font-bold">{stats?.totalClients || 0}</div>
+              <p className="text-xs text-muted-foreground">Active client base</p>
+            </CardContent>
+          </Card>
 
-        <Card className="rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.pendingTasks || 0}</div>
-            <p className="text-xs text-muted-foreground">Require attention</p>
-          </CardContent>
-        </Card>
+          <Card className="uniform-card uniform-hover-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                Pending Tasks
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="text-2xl font-bold">{stats?.pendingTasks || 0}</div>
+              <p className="text-xs text-muted-foreground">Require attention</p>
+            </CardContent>
+          </Card>
 
-        <Card className="rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Upcoming Deadlines</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats?.upcomingDeadlines || 0}</div>
-            <p className="text-xs text-muted-foreground">Next 7 days</p>
-          </CardContent>
-        </Card>
+          <Card className="uniform-card uniform-hover-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                Upcoming Deadlines
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="text-2xl font-bold text-yellow-600">{stats?.upcomingDeadlines || 0}</div>
+              <p className="text-xs text-muted-foreground">Next 7 days</p>
+            </CardContent>
+          </Card>
 
-        <Card className="rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Returns</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats?.completedReturns || 0}</div>
-            <p className="text-xs text-muted-foreground">This year</p>
-          </CardContent>
-        </Card>
+          <Card className="uniform-card uniform-hover-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                Completed Returns
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="text-2xl font-bold text-green-600">{stats?.completedReturns || 0}</div>
+              <p className="text-xs text-muted-foreground">This year</p>
+            </CardContent>
+          </Card>
 
-        <Card className="rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Notices</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats?.pendingNotices || 0}</div>
-            <p className="text-xs text-muted-foreground">Need response</p>
-          </CardContent>
-        </Card>
+          <Card className="uniform-card uniform-hover-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                Pending Notices
+                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="text-2xl font-bold text-red-600">{stats?.pendingNotices || 0}</div>
+              <p className="text-xs text-muted-foreground">Need response</p>
+            </CardContent>
+          </Card>
 
-        <Card className="rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue Items</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats?.overdueCompliances || 0}</div>
-            <p className="text-xs text-muted-foreground">Past due date</p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card className="uniform-card uniform-hover-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                Overdue Items
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="text-2xl font-bold text-red-600">{stats?.overdueCompliances || 0}</div>
+              <p className="text-xs text-muted-foreground">Past due date</p>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Recent Activity */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="rounded-xl">
-          <CardHeader>
-            <CardTitle>Recent Tasks</CardTitle>
-            <CardDescription>Latest task assignments and updates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentTasks?.map((task) => (
-                <div key={task.id} className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{task.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {task.clients?.client_name} • {task.task_type}
-                    </p>
-                  </div>
-                  <Badge 
-                    variant={task.status === 'Completed' ? 'default' : 
-                             task.status === 'In Progress' ? 'secondary' : 'outline'}
-                  >
-                    {task.status}
-                  </Badge>
-                </div>
-              ))}
-              {(!recentTasks || recentTasks.length === 0) && (
-                <p className="text-sm text-muted-foreground">No recent tasks</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-xl">
-          <CardHeader>
-            <CardTitle>Upcoming Deadlines</CardTitle>
-            <CardDescription>Compliance deadlines in the next 7 days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {upcomingCompliances?.map((compliance) => (
-                <div key={compliance.id} className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{compliance.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {compliance.clients?.client_name} • {compliance.compliance_type}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium">
-                      {new Date(compliance.due_date).toLocaleDateString()}
-                    </p>
-                    <Badge variant={compliance.priority === 'High' ? 'destructive' : 'outline'}>
-                      {compliance.priority}
+        {/* Recent Activity */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="uniform-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle>Recent Tasks</CardTitle>
+              <CardDescription>Latest task assignments and updates</CardDescription>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="space-y-4">
+                {recentTasks?.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">{task.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {task.clients?.client_name} • {task.task_type}
+                      </p>
+                    </div>
+                    <Badge 
+                      variant={task.status === 'Completed' ? 'default' : 
+                               task.status === 'In Progress' ? 'secondary' : 'outline'}
+                    >
+                      {task.status}
                     </Badge>
                   </div>
-                </div>
-              ))}
-              {(!upcomingCompliances || upcomingCompliances.length === 0) && (
-                <p className="text-sm text-muted-foreground">No upcoming deadlines</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+                {(!recentTasks || recentTasks.length === 0) && (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">No recent tasks</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="uniform-card">
+            <CardHeader className="uniform-card-header">
+              <CardTitle>Upcoming Deadlines</CardTitle>
+              <CardDescription>Compliance deadlines in the next 7 days</CardDescription>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <div className="space-y-4">
+                {upcomingCompliances?.map((compliance) => (
+                  <div key={compliance.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">{compliance.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {compliance.clients?.client_name} • {compliance.compliance_type}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-medium">
+                        {new Date(compliance.due_date).toLocaleDateString()}
+                      </p>
+                      <Badge variant={compliance.priority === 'High' ? 'destructive' : 'outline'}>
+                        {compliance.priority}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+                {(!upcomingCompliances || upcomingCompliances.length === 0) && (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">No upcoming deadlines</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

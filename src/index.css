@@ -37,19 +37,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -99,5 +92,95 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Utility Classes for Uniform Design */
+@layer utilities {
+  .uniform-card {
+    @apply rounded-xl border border-border bg-card shadow-sm;
+  }
+  
+  .uniform-card-header {
+    @apply p-6 pb-4;
+  }
+  
+  .uniform-card-content {
+    @apply p-6 pt-0;
+  }
+  
+  .uniform-section-title {
+    @apply text-2xl font-bold tracking-tight text-foreground mb-2;
+  }
+  
+  .uniform-section-subtitle {
+    @apply text-sm text-muted-foreground mb-6;
+  }
+  
+  .uniform-input-group {
+    @apply space-y-2;
+  }
+  
+  .uniform-input-label {
+    @apply text-sm font-medium text-foreground;
+  }
+  
+  .uniform-stats-grid {
+    @apply grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .uniform-form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .uniform-button-group {
+    @apply flex flex-wrap gap-2;
+  }
+  
+  .uniform-page-container {
+    @apply min-h-screen bg-background;
+  }
+  
+  .uniform-content-wrapper {
+    @apply p-6 max-w-7xl mx-auto;
+  }
+  
+  .uniform-tab-content {
+    @apply space-y-6;
+  }
+  
+  .uniform-alert-warning {
+    @apply border-orange-200 bg-orange-50 text-orange-800;
+  }
+  
+  .uniform-alert-info {
+    @apply border-blue-200 bg-blue-50 text-blue-800;
+  }
+  
+  .uniform-alert-success {
+    @apply border-green-200 bg-green-50 text-green-800;
+  }
+  
+  .uniform-alert-error {
+    @apply border-red-200 bg-red-50 text-red-800;
+  }
+}
+
+/* Consistent hover and focus states */
+@layer components {
+  .uniform-hover-card {
+    @apply transition-all duration-200 hover:shadow-md hover:border-primary/20;
+  }
+  
+  .uniform-focus-input {
+    @apply focus:ring-2 focus:ring-primary/20 focus:border-primary;
+  }
+  
+  .uniform-button-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-2 focus:ring-primary/20;
+  }
+  
+  .uniform-button-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-2 focus:ring-secondary/20;
   }
 }
