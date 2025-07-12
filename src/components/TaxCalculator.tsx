@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calculator, ChartBar, HelpCircle, LogOut, User, Library, AlertTriangle, Lightbulb, TrendingDown, Receipt, Home } from 'lucide-react';
+import { Calculator, ChartBar, HelpCircle, Lightbulb, TrendingDown, Receipt, Home } from 'lucide-react';
 import { IncomeData, DeductionData, TDSData, TCSData, HousePropertyData, CarryForwardLoss, calculateOldRegimeTax, calculateNewRegimeTax, getOptimalRegime } from '@/utils/taxCalculations';
 import { TaxComparison } from './TaxComparison';
 import { IncomeEntry } from './IncomeEntry';
@@ -15,14 +15,10 @@ import { TDSTCSEntry } from './TDSEntry';
 import { CarryForwardLossEntry } from './CarryForwardLossEntry';
 import { HousePropertyEntry } from './HousePropertyEntry';
 import { HelpManual } from './HelpManual';
-import { TaxLibrary } from './TaxLibrary';
 import { SmartInsights } from './SmartInsights';
-import { useAuth } from '@/hooks/useAuth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const TaxCalculator = () => {
-  const { user, profile, signOut } = useAuth();
-  
   const [age, setAge] = useState<number>(30);
   const [taxpayerName, setTaxpayerName] = useState<string>('');
   const [income, setIncome] = useState<IncomeData>({
@@ -141,50 +137,24 @@ export const TaxCalculator = () => {
   const hasValidIncome = totalIncome > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <div className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-xl">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center shadow-lg">
-                <Calculator className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white">Smart Tax Calculator Pro</h1>
-                <p className="text-sm text-slate-400">FY 2024-25 • AI-Powered • Comprehensive Tax Planning</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 text-slate-300 bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-600/30">
-                <User className="w-4 h-4" />
-                <span className="text-sm font-medium">{profile?.full_name || user?.email}</span>
-              </div>
-              <Button 
-                onClick={signOut} 
-                variant="ghost" 
-                size="sm" 
-                className="text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-2xl px-4 py-2 transition-all duration-200"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-6 py-8">
+    <div className="h-full bg-background">
+      <div className="p-6">
         <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Calculator className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">Tax Calculator</h1>
+            </div>
+            <p className="text-muted-foreground">Calculate income tax for FY 2024-25 with AI-powered insights</p>
+          </div>
+
           {/* Smart Alerts */}
           {anomalies.length > 0 && (
-            <Alert className="mb-6 bg-amber-500/10 border-amber-500/20 rounded-2xl">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertDescription className="text-amber-200">
+            <Alert className="mb-6 border-orange-200 bg-orange-50">
+              <AlertDescription className="text-orange-800">
                 <div className="space-y-1">
                   {anomalies.map((anomaly, index) => (
-                    <div key={index}>• {anomaly}</div>
+                    <div key={index}>⚠️ {anomaly}</div>
                   ))}
                 </div>
               </AlertDescription>
@@ -192,9 +162,8 @@ export const TaxCalculator = () => {
           )}
 
           {suggestions.length > 0 && (
-            <Alert className="mb-6 bg-blue-500/10 border-blue-500/20 rounded-2xl">
-              <Lightbulb className="h-4 w-4 text-blue-400" />
-              <AlertDescription className="text-blue-200">
+            <Alert className="mb-6 border-blue-200 bg-blue-50">
+              <AlertDescription className="text-blue-800">
                 <div className="space-y-1">
                   {suggestions.map((suggestion, index) => (
                     <div key={index}>💡 {suggestion}</div>
@@ -205,59 +174,57 @@ export const TaxCalculator = () => {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-9 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
-              <TabsTrigger value="income" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+            <TabsList className="grid w-full grid-cols-9 mb-8 bg-muted p-1">
+              <TabsTrigger value="income" className="flex items-center gap-2">
                 <Calculator className="w-4 h-4" />
                 Income
               </TabsTrigger>
-              <TabsTrigger value="house-property" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="house-property" className="flex items-center gap-2">
                 <Home className="w-4 h-4" />
                 Property
               </TabsTrigger>
-              <TabsTrigger value="capital-gains" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="capital-gains" className="flex items-center gap-2">
                 <Calculator className="w-4 h-4" />
                 Capital Gains
               </TabsTrigger>
-              <TabsTrigger value="deductions" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="deductions" className="flex items-center gap-2">
                 <Calculator className="w-4 h-4" />
                 Deductions
               </TabsTrigger>
-              <TabsTrigger value="tds-tcs" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="tds-tcs" className="flex items-center gap-2">
                 <Receipt className="w-4 h-4" />
                 TDS/TCS
               </TabsTrigger>
-              <TabsTrigger value="losses" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="losses" className="flex items-center gap-2">
                 <TrendingDown className="w-4 h-4" />
                 Losses
               </TabsTrigger>
-              <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="insights" className="flex items-center gap-2">
                 <Lightbulb className="w-4 h-4" />
                 Insights
               </TabsTrigger>
-              <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2">
                 <ChartBar className="w-4 h-4" />
                 Results
               </TabsTrigger>
-              <TabsTrigger value="help" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="help" className="flex items-center gap-2">
                 <HelpCircle className="w-4 h-4" />
                 Help
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="income" className="space-y-6">
-              <Card className="bg-slate-800/50 border-slate-600/30 rounded-2xl backdrop-blur-sm hover:bg-slate-800/60 transition-all duration-200">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-white">
-                    <div className="w-8 h-8 bg-slate-600 rounded-2xl flex items-center justify-center">
-                      <Calculator className="w-4 h-4 text-white" />
-                    </div>
+                  <CardTitle className="flex items-center gap-3">
+                    <Calculator className="w-5 h-5" />
                     Personal & Income Details
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="age" className="text-slate-300 font-medium">Age</Label>
+                      <Label htmlFor="age">Age</Label>
                       <Input
                         id="age"
                         type="number"
@@ -265,7 +232,6 @@ export const TaxCalculator = () => {
                         onChange={(e) => handleAgeUpdate(Number(e.target.value) || 0)}
                         min="18"
                         max="100"
-                        className="bg-slate-700/50 border-slate-600/50 text-white rounded-2xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 transition-all duration-200"
                         placeholder="Enter your age"
                       />
                     </div>
