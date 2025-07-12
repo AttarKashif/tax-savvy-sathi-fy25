@@ -5,14 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calculator, ChartBar, HelpCircle, LogOut, User, Library, AlertTriangle, Lightbulb, TrendingDown, Receipt } from 'lucide-react';
-import { IncomeData, DeductionData, TDSData, CarryForwardLoss, calculateOldRegimeTax, calculateNewRegimeTax, getOptimalRegime } from '@/utils/taxCalculations';
+import { Calculator, ChartBar, HelpCircle, LogOut, User, Library, AlertTriangle, Lightbulb, TrendingDown, Receipt, Home } from 'lucide-react';
+import { IncomeData, DeductionData, TDSData, TCSData, HousePropertyData, CarryForwardLoss, calculateOldRegimeTax, calculateNewRegimeTax, getOptimalRegime } from '@/utils/taxCalculations';
 import { TaxComparison } from './TaxComparison';
 import { IncomeEntry } from './IncomeEntry';
 import { DeductionEntry } from './DeductionEntry';
 import { CapitalGainsEntry } from './CapitalGainsEntry';
-import { TDSEntry } from './TDSEntry';
+import { TDSTCSEntry } from './TDSEntry';
 import { CarryForwardLossEntry } from './CarryForwardLossEntry';
+import { HousePropertyEntry } from './HousePropertyEntry';
 import { HelpManual } from './HelpManual';
 import { TaxLibrary } from './TaxLibrary';
 import { SmartInsights } from './SmartInsights';
@@ -29,7 +30,16 @@ export const TaxCalculator = () => {
     basicSalary: 0,
     businessIncome: 0,
     capitalGains: [],
-    otherSources: 0
+    otherSources: 0,
+    houseProperty: {
+      annualRentReceived: 0,
+      municipalTaxes: 0,
+      repairMaintenance: 0,
+      interestOnLoan: 0,
+      otherExpenses: 0,
+      isLetOut: false,
+      selfOccupiedCount: 1
+    }
   });
   
   const [deductions, setDeductions] = useState<DeductionData>({
@@ -60,6 +70,15 @@ export const TaxCalculator = () => {
     interestFromBank: 0,
     rentReceived: 0,
     otherTDS: 0
+  });
+
+  const [tcsData, setTCSData] = useState<TCSData>({
+    saleOfGoods: 0,
+    foreignRemittance: 0,
+    motorVehicles: 0,
+    jewelryPurchase: 0,
+    hotelBills: 0,
+    otherTCS: 0
   });
 
   const [carryForwardLosses, setCarryForwardLosses] = useState<CarryForwardLoss[]>([]);
@@ -107,8 +126,8 @@ export const TaxCalculator = () => {
     setTaxpayerName(newName);
   }, []);
 
-  const oldRegimeResult = calculateOldRegimeTax(income, deductions, age, tdsData, carryForwardLosses);
-  const newRegimeResult = calculateNewRegimeTax(income, deductions, age, tdsData, carryForwardLosses);
+  const oldRegimeResult = calculateOldRegimeTax(income, deductions, age, tdsData, tcsData, carryForwardLosses);
+  const newRegimeResult = calculateNewRegimeTax(income, deductions, age, tdsData, tcsData, carryForwardLosses);
   const recommendation = getOptimalRegime(oldRegimeResult, newRegimeResult);
 
   const handleCalculate = useCallback(() => {
@@ -118,7 +137,7 @@ export const TaxCalculator = () => {
 
   const totalIncome = income.salary + income.businessIncome + 
                      income.capitalGains.reduce((sum, gain) => sum + gain.amount, 0) + 
-                     income.otherSources;
+                     income.otherSources + Math.max(0, oldRegimeResult.housePropertyIncome);
   const hasValidIncome = totalIncome > 0;
 
   return (
@@ -133,7 +152,7 @@ export const TaxCalculator = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">Smart Tax Calculator Pro</h1>
-                <p className="text-sm text-slate-400">FY 2024-25 • AI-Powered • Asset-Specific</p>
+                <p className="text-sm text-slate-400">FY 2024-25 • AI-Powered • Comprehensive Tax Planning</p>
               </div>
             </div>
             
@@ -186,10 +205,14 @@ export const TaxCalculator = () => {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-8 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-9 mb-8 bg-slate-800/50 border border-slate-600/30 rounded-2xl p-1 backdrop-blur-sm">
               <TabsTrigger value="income" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Calculator className="w-4 h-4" />
                 Income
+              </TabsTrigger>
+              <TabsTrigger value="house-property" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+                <Home className="w-4 h-4" />
+                Property
               </TabsTrigger>
               <TabsTrigger value="capital-gains" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Calculator className="w-4 h-4" />
@@ -199,9 +222,9 @@ export const TaxCalculator = () => {
                 <Calculator className="w-4 h-4" />
                 Deductions
               </TabsTrigger>
-              <TabsTrigger value="tds" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
+              <TabsTrigger value="tds-tcs" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <Receipt className="w-4 h-4" />
-                TDS
+                TDS/TCS
               </TabsTrigger>
               <TabsTrigger value="losses" className="flex items-center gap-2 data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-xl transition-all duration-200 hover:bg-slate-700/50 text-slate-300">
                 <TrendingDown className="w-4 h-4" />
@@ -258,6 +281,13 @@ export const TaxCalculator = () => {
               </Card>
             </TabsContent>
 
+            <TabsContent value="house-property" className="space-y-6">
+              <HousePropertyEntry 
+                houseProperty={income.houseProperty} 
+                setHouseProperty={(data) => setIncome({...income, houseProperty: data})} 
+              />
+            </TabsContent>
+
             <TabsContent value="capital-gains" className="space-y-6">
               <CapitalGainsEntry 
                 capitalGains={income.capitalGains} 
@@ -276,8 +306,13 @@ export const TaxCalculator = () => {
               />
             </TabsContent>
 
-            <TabsContent value="tds" className="space-y-6">
-              <TDSEntry tdsData={tdsData} setTDSData={setTDSData} />
+            <TabsContent value="tds-tcs" className="space-y-6">
+              <TDSTCSEntry 
+                tdsData={tdsData} 
+                setTDSData={setTDSData}
+                tcsData={tcsData}
+                setTCSData={setTCSData}
+              />
             </TabsContent>
 
             <TabsContent value="losses" className="space-y-6">

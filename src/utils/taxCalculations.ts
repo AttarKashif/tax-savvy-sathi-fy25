@@ -1,4 +1,3 @@
-
 // Tax calculation utilities for FY 2024-25 (AY 2025-26)
 
 export interface TaxSlabRate {
@@ -42,12 +41,32 @@ export interface TDSData {
   otherTDS: number;
 }
 
+export interface TCSData {
+  saleOfGoods: number;
+  foreignRemittance: number;
+  motorVehicles: number;
+  jewelryPurchase: number;
+  hotelBills: number;
+  otherTCS: number;
+}
+
+export interface HousePropertyData {
+  annualRentReceived: number;
+  municipalTaxes: number;
+  repairMaintenance: number;
+  interestOnLoan: number;
+  otherExpenses: number;
+  isLetOut: boolean;
+  selfOccupiedCount: number;
+}
+
 export interface IncomeData {
   salary: number;
   basicSalary: number;
   businessIncome: number;
   capitalGains: CapitalGain[];
   otherSources: number;
+  houseProperty: HousePropertyData;
 }
 
 export interface DeductionData {
@@ -86,8 +105,10 @@ export interface TaxResult {
   capitalGainsTax: number;
   regularIncomeTax: number;
   tdsDeducted: number;
+  tcsDeducted: number;
   netTaxPayable: number;
   advanceTaxRequired: number;
+  housePropertyIncome: number;
 }
 
 // Asset type definitions with current tax rates
@@ -182,6 +203,30 @@ export const newRegimeSlabs = [
   { min: 1200000, max: 1500000, rate: 20 },
   { min: 1500000, max: Infinity, rate: 30 }
 ];
+
+export function calculateHousePropertyIncome(houseProperty: HousePropertyData): number {
+  if (!houseProperty.isLetOut && houseProperty.selfOccupiedCount <= 2) {
+    // Self-occupied property - only interest on housing loan is deductible (max ₹2 lakh)
+    return Math.max(0, -Math.min(200000, houseProperty.interestOnLoan));
+  }
+
+  // Let-out property
+  const grossAnnualValue = houseProperty.annualRentReceived;
+  const netAnnualValue = Math.max(0, grossAnnualValue - houseProperty.municipalTaxes);
+  
+  // Standard deduction: 30% of NAV
+  const standardDeduction = netAnnualValue * 0.3;
+  
+  // Other allowable expenses
+  const otherExpenses = houseProperty.repairMaintenance + 
+                       houseProperty.interestOnLoan + 
+                       houseProperty.otherExpenses;
+  
+  const totalDeductions = standardDeduction + otherExpenses;
+  const housePropertyIncome = netAnnualValue - totalDeductions;
+  
+  return housePropertyIncome;
+}
 
 export function calculateTaxOnSlabs(taxableIncome: number, slabs: TaxSlabRate[]): number {
   let tax = 0;
@@ -300,12 +345,54 @@ export function applyCarryForwardLosses(
       lossesUtilized.longTermLoss += setOff;
     }
 
+    // House property loss can be set off against any income except salary
+    if (remaining.housePropertyLoss > 0) {
+      // Set off against house property income first (though it's negative)
+      if (adjustedIncome.housePropertyIncome > 0) {
+        const setOff = Math.min(remaining.housePropertyLoss, adjustedIncome.housePropertyIncome);
+        adjustedIncome.housePropertyIncome -= setOff;
+        remaining.housePropertyLoss -= setOff;
+        lossesUtilized.housePropertyLoss += setOff;
+      }
+      
+      // Then against business income
+      if (remaining.housePropertyLoss > 0 && adjustedIncome.businessIncome > 0) {
+        const setOff = Math.min(remaining.housePropertyLoss, adjustedIncome.businessIncome);
+        adjustedIncome.businessIncome -= setOff;
+        remaining.housePropertyLoss -= setOff;
+        lossesUtilized.housePropertyLoss += setOff;
+      }
+      
+      // Then against capital gains
+      if (remaining.housePropertyLoss > 0 && adjustedIncome.capitalGainsShort > 0) {
+        const setOff = Math.min(remaining.housePropertyLoss, adjustedIncome.capitalGainsShort);
+        adjustedIncome.capitalGainsShort -= setOff;
+        remaining.housePropertyLoss -= setOff;
+        lossesUtilized.housePropertyLoss += setOff;
+      }
+      
+      if (remaining.housePropertyLoss > 0 && adjustedIncome.capitalGainsLong > 0) {
+        const setOff = Math.min(remaining.housePropertyLoss, adjustedIncome.capitalGainsLong);
+        adjustedIncome.capitalGainsLong -= setOff;
+        remaining.housePropertyLoss -= setOff;
+        lossesUtilized.housePropertyLoss += setOff;
+      }
+    }
+
     // Business loss can be set off against any income except salary
     if (remaining.businessLoss > 0) {
       // Set off against business income first
       if (adjustedIncome.businessIncome > 0) {
         const setOff = Math.min(remaining.businessLoss, adjustedIncome.businessIncome);
         adjustedIncome.businessIncome -= setOff;
+        remaining.businessLoss -= setOff;
+        lossesUtilized.businessLoss += setOff;
+      }
+      
+      // Then against house property income
+      if (remaining.businessLoss > 0 && adjustedIncome.housePropertyIncome > 0) {
+        const setOff = Math.min(remaining.businessLoss, adjustedIncome.housePropertyIncome);
+        adjustedIncome.housePropertyIncome -= setOff;
         remaining.businessLoss -= setOff;
         lossesUtilized.businessLoss += setOff;
       }
@@ -324,6 +411,14 @@ export function applyCarryForwardLosses(
         remaining.businessLoss -= setOff;
         lossesUtilized.businessLoss += setOff;
       }
+    }
+
+    // Speculative business loss can only be set off against speculative business income
+    if (remaining.speculativeLoss > 0 && adjustedIncome.speculativeIncome > 0) {
+      const setOff = Math.min(remaining.speculativeLoss, adjustedIncome.speculativeIncome);
+      adjustedIncome.speculativeIncome -= setOff;
+      remaining.speculativeLoss -= setOff;
+      lossesUtilized.speculativeLoss += setOff;
     }
 
     // Add remaining losses to carry forward
@@ -354,8 +449,12 @@ export function calculateOldRegimeTax(
   deductions: DeductionData,
   age: number,
   tdsData: TDSData,
+  tcsData: TCSData,
   carryForwardLosses: CarryForwardLoss[] = []
 ): TaxResult {
+  // Calculate house property income
+  const housePropertyIncome = calculateHousePropertyIncome(income.houseProperty);
+  
   // Calculate capital gains tax separately
   const capitalGainsResult = calculateCapitalGainsTax(income.capitalGains);
   
@@ -375,14 +474,15 @@ export function calculateOldRegimeTax(
     businessIncome: income.businessIncome,
     capitalGainsShort: income.capitalGains.filter(g => !g.isLongTerm).reduce((sum, g) => sum + g.amount, 0),
     capitalGainsLong: income.capitalGains.filter(g => g.isLongTerm).reduce((sum, g) => sum + g.amount, 0),
-    housePropertyIncome: 0, // Not implemented yet
+    housePropertyIncome: housePropertyIncome,
     speculativeIncome: 0 // Not implemented yet
   };
 
   const lossAdjustment = applyCarryForwardLosses(currentIncome, carryForwardLosses);
 
   const grossIncome = income.salary + lossAdjustment.adjustedIncome.businessIncome + 
-                     totalCapitalGainsForSlab + income.otherSources;
+                     totalCapitalGainsForSlab + income.otherSources + 
+                     lossAdjustment.adjustedIncome.housePropertyIncome;
   
   // Standard deduction for salary (₹50,000)
   const standardDeduction = Math.min(income.salary, 50000);
@@ -416,7 +516,11 @@ export function calculateOldRegimeTax(
   const totalTDS = tdsData.salary + tdsData.professionalServices + tdsData.interestFromBank + 
                    tdsData.rentReceived + tdsData.otherTDS;
   
-  const netTaxPayable = Math.max(0, totalTax - totalTDS);
+  const totalTCS = tcsData.saleOfGoods + tcsData.foreignRemittance + tcsData.motorVehicles + 
+                   tcsData.jewelryPurchase + tcsData.hotelBills + tcsData.otherTCS;
+  
+  const totalTaxDeducted = totalTDS + totalTCS;
+  const netTaxPayable = Math.max(0, totalTax - totalTaxDeducted);
   const advanceTaxRequired = netTaxPayable > 10000 ? netTaxPayable * 0.9 : 0;
   
   return {
@@ -433,8 +537,10 @@ export function calculateOldRegimeTax(
     capitalGainsTax: capitalGainsResult.totalTax,
     regularIncomeTax,
     tdsDeducted: totalTDS,
+    tcsDeducted: totalTCS,
     netTaxPayable,
-    advanceTaxRequired
+    advanceTaxRequired,
+    housePropertyIncome
   };
 }
 
@@ -443,9 +549,11 @@ export function calculateNewRegimeTax(
   deductions: DeductionData, 
   age: number,
   tdsData: TDSData,
+  tcsData: TCSData,
   carryForwardLosses: CarryForwardLoss[] = []
 ): TaxResult {
   // Similar logic as old regime but with new tax slabs and limited deductions
+  const housePropertyIncome = calculateHousePropertyIncome(income.houseProperty);
   const capitalGainsResult = calculateCapitalGainsTax(income.capitalGains);
   
   const totalCapitalGainsForSlab = income.capitalGains
@@ -462,14 +570,15 @@ export function calculateNewRegimeTax(
     businessIncome: income.businessIncome,
     capitalGainsShort: income.capitalGains.filter(g => !g.isLongTerm).reduce((sum, g) => sum + g.amount, 0),
     capitalGainsLong: income.capitalGains.filter(g => g.isLongTerm).reduce((sum, g) => sum + g.amount, 0),
-    housePropertyIncome: 0,
+    housePropertyIncome: housePropertyIncome,
     speculativeIncome: 0
   };
 
   const lossAdjustment = applyCarryForwardLosses(currentIncome, carryForwardLosses);
 
   const grossIncome = income.salary + lossAdjustment.adjustedIncome.businessIncome + 
-                     totalCapitalGainsForSlab + income.otherSources;
+                     totalCapitalGainsForSlab + income.otherSources + 
+                     lossAdjustment.adjustedIncome.housePropertyIncome;
   
   // Standard deduction for salary (₹75,000 in new regime)
   const standardDeduction = Math.min(income.salary, 75000);
@@ -492,7 +601,11 @@ export function calculateNewRegimeTax(
   const totalTDS = tdsData.salary + tdsData.professionalServices + tdsData.interestFromBank + 
                    tdsData.rentReceived + tdsData.otherTDS;
   
-  const netTaxPayable = Math.max(0, totalTax - totalTDS);
+  const totalTCS = tcsData.saleOfGoods + tcsData.foreignRemittance + tcsData.motorVehicles + 
+                   tcsData.jewelryPurchase + tcsData.hotelBills + tcsData.otherTCS;
+  
+  const totalTaxDeducted = totalTDS + totalTCS;
+  const netTaxPayable = Math.max(0, totalTax - totalTaxDeducted);
   const advanceTaxRequired = netTaxPayable > 10000 ? netTaxPayable * 0.9 : 0;
   
   return {
@@ -509,8 +622,10 @@ export function calculateNewRegimeTax(
     capitalGainsTax: capitalGainsResult.totalTax,
     regularIncomeTax,
     tdsDeducted: totalTDS,
+    tcsDeducted: totalTCS,
     netTaxPayable,
-    advanceTaxRequired
+    advanceTaxRequired,
+    housePropertyIncome
   };
 }
 
