@@ -5,8 +5,6 @@ import {
   Calculator,
   LayoutDashboard, 
   Users, 
-  Calendar, 
-  FileText, 
   MessageSquare,
   BookOpen,
   Settings,
@@ -14,8 +12,7 @@ import {
   FileSpreadsheet,
   Receipt,
   Shield,
-  Building,
-  UserCheck
+  FileBarChart
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -34,10 +31,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'itr-filing', label: 'ITR Filing', icon: FileSpreadsheet },
     { id: 'audit-reports', label: 'Audit Reports', icon: Shield },
     { id: 'tds-returns', label: 'TDS Returns', icon: Receipt },
-    { id: 'compliance', label: 'Compliance', icon: Calendar },
-    { id: 'tasks', label: 'Tasks', icon: FileText },
-    { id: 'office-mgmt', label: 'Office Management', icon: Building },
-    { id: 'user-mgmt', label: 'User Management', icon: UserCheck },
+    { id: 'report-generator', label: 'Report Generator', icon: FileBarChart },
     { id: 'chat', label: 'AI Assistant', icon: MessageSquare },
     { id: 'library', label: 'Tax Library', icon: BookOpen },
   ];

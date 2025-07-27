@@ -3,8 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Bot, User, Send } from 'lucide-react';
-import { IncomeData, DeductionData } from '@/utils/taxCalculations';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Bot, User, Send, Sparkles, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Message {
   id: string;
@@ -13,35 +15,21 @@ interface Message {
   timestamp: Date;
 }
 
-interface AIChatProps {
-  income: IncomeData;
-  setIncome: (income: IncomeData) => void;
-  deductions: DeductionData;
-  setDeductions: (deductions: DeductionData) => void;
-  age: number;
-  setAge: (age: number) => void;
-  onCalculate: () => void;
-}
+interface AIChatProps {}
 
-export const AIChat: React.FC<AIChatProps> = ({
-  income,
-  setIncome,
-  deductions,
-  setDeductions,
-  age,
-  setAge,
-  onCalculate
-}) => {
+export const AIChat: React.FC<AIChatProps> = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       type: 'ai',
-      content: "Hello! I'm your AI Tax Assistant for FY 2024-25. I'll help you calculate your income tax and find the best regime for you. Let's start with some basic information. What's your age?",
+      content: "Hello! I'm your AI Tax Assistant powered by Gemini. I can help you with tax calculations, ITR filing guidance, compliance queries, and general tax advice. What would you like to know?",
       timestamp: new Date()
     }
   ]);
   const [currentInput, setCurrentInput] = useState('');
-  const [currentStep, setCurrentStep] = useState('age');
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -62,139 +50,50 @@ export const AIChat: React.FC<AIChatProps> = ({
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const processUserInput = (userInput: string) => {
+  const connectToGemini = () => {
+    if (apiKey.trim()) {
+      setIsConnected(true);
+      addMessage("Great! I'm now connected to Gemini AI. I can help you with comprehensive tax advice, calculations, and compliance guidance. What would you like to know?", 'ai');
+    }
+  };
+
+  const processUserInput = async (userInput: string) => {
+    if (!isConnected) {
+      addMessage("Please connect your Gemini API key first to start chatting.", 'ai');
+      return;
+    }
+
     addMessage(userInput, 'user');
+    setIsLoading(true);
+
+    try {
+      // Mock Gemini API call - replace with actual implementation
+      const response = await mockGeminiCall(userInput);
+      addMessage(response, 'ai');
+    } catch (error) {
+      addMessage("I apologize, but I encountered an error processing your request. Please try again.", 'ai');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const mockGeminiCall = async (input: string): Promise<string> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const input = userInput.toLowerCase().trim();
-    const numericValue = parseFloat(userInput.replace(/[^\d.]/g, ''));
-
-    switch (currentStep) {
-      case 'age':
-        if (numericValue && numericValue >= 18 && numericValue <= 100) {
-          setAge(numericValue);
-          addMessage(`Great! I've noted your age as ${numericValue}. Now, let's talk about your income. What's your annual salary income for FY 2024-25? (Enter in ₹)`, 'ai');
-          setCurrentStep('salary');
-        } else {
-          addMessage("Please enter a valid age between 18 and 100.", 'ai');
-        }
-        break;
-
-      case 'salary':
-        if (numericValue >= 0) {
-          setIncome({ ...income, salary: numericValue });
-          if (numericValue > 0) {
-            addMessage(`Perfect! I've recorded your salary as ₹${numericValue.toLocaleString('en-IN')}. Do you have any business or professional income? If yes, enter the amount, otherwise type 0.`, 'ai');
-          } else {
-            addMessage(`I see you don't have salary income. Do you have any business or professional income? If yes, enter the amount, otherwise type 0.`, 'ai');
-          }
-          setCurrentStep('business');
-        } else {
-          addMessage("Please enter a valid salary amount (enter 0 if no salary income).", 'ai');
-        }
-        break;
-
-      case 'business':
-        if (numericValue >= 0) {
-          setIncome({ ...income, businessIncome: numericValue });
-          if (numericValue > 0) {
-            addMessage(`Noted! Business income: ₹${numericValue.toLocaleString('en-IN')}. Do you have any capital gains from investments? Enter short-term capital gains amount (or 0 if none).`, 'ai');
-          } else {
-            addMessage(`No business income noted. Do you have any capital gains from investments? Enter short-term capital gains amount (or 0 if none).`, 'ai');
-          }
-          setCurrentStep('capitalShort');
-        } else {
-          addMessage("Please enter a valid business income amount (enter 0 if no business income).", 'ai');
-        }
-        break;
-
-      case 'capitalShort':
-        if (numericValue >= 0) {
-          // Add short-term capital gain to the capitalGains array
-          const newCapitalGains = [...income.capitalGains];
-          if (numericValue > 0) {
-            newCapitalGains.push({
-              assetType: 'equity_shares',
-              isLongTerm: false,
-              amount: numericValue
-            });
-          }
-          setIncome({ ...income, capitalGains: newCapitalGains });
-          addMessage(`Short-term capital gains: ₹${numericValue.toLocaleString('en-IN')}. Now enter your long-term capital gains amount (or 0 if none).`, 'ai');
-          setCurrentStep('capitalLong');
-        } else {
-          addMessage("Please enter a valid short-term capital gains amount (enter 0 if none).", 'ai');
-        }
-        break;
-
-      case 'capitalLong':
-        if (numericValue >= 0) {
-          // Add long-term capital gain to the capitalGains array
-          const newCapitalGains = [...income.capitalGains];
-          if (numericValue > 0) {
-            newCapitalGains.push({
-              assetType: 'equity_shares',
-              isLongTerm: true,
-              amount: numericValue
-            });
-          }
-          setIncome({ ...income, capitalGains: newCapitalGains });
-          addMessage(`Long-term capital gains: ₹${numericValue.toLocaleString('en-IN')}. Finally, do you have income from other sources like interest, dividends etc.? Enter the amount (or 0 if none).`, 'ai');
-          setCurrentStep('otherIncome');
-        } else {
-          addMessage("Please enter a valid long-term capital gains amount (enter 0 if none).", 'ai');
-        }
-        break;
-
-      case 'otherIncome':
-        if (numericValue >= 0) {
-          setIncome({ ...income, otherSources: numericValue });
-          addMessage(`Other income: ₹${numericValue.toLocaleString('en-IN')}. Now let's discuss deductions for the Old Tax Regime. Do you have investments under Section 80C like PPF, ELSS, LIC etc.? Enter the total amount (max ₹1.5 lakh benefit).`, 'ai');
-          setCurrentStep('section80C');
-        } else {
-          addMessage("Please enter a valid amount for other income (enter 0 if none).", 'ai');
-        }
-        break;
-
-      case 'section80C':
-        if (numericValue >= 0) {
-          setDeductions({ ...deductions, section80C: Math.min(numericValue, 150000) });
-          addMessage(`Section 80C investments: ₹${Math.min(numericValue, 150000).toLocaleString('en-IN')}. Do you pay medical insurance premiums? Enter Section 80D amount (max ₹25,000 for regular, ₹50,000 for senior citizens).`, 'ai');
-          setCurrentStep('section80D');
-        } else {
-          addMessage("Please enter a valid Section 80C amount (enter 0 if none).", 'ai');
-        }
-        break;
-
-      case 'section80D':
-        if (numericValue >= 0) {
-          const maxLimit = age >= 60 ? 50000 : 25000;
-          setDeductions({ ...deductions, section80D: Math.min(numericValue, maxLimit) });
-          addMessage(`Medical insurance (80D): ₹${Math.min(numericValue, maxLimit).toLocaleString('en-IN')}. Do you pay house rent and claim HRA? Enter your annual HRA exemption amount (or 0 if not applicable).`, 'ai');
-          setCurrentStep('hra');
-        } else {
-          addMessage("Please enter a valid Section 80D amount (enter 0 if none).", 'ai');
-        }
-        break;
-
-      case 'hra':
-        if (numericValue >= 0) {
-          setDeductions({ ...deductions, hra: numericValue });
-          addMessage(`HRA exemption: ₹${numericValue.toLocaleString('en-IN')}. Perfect! I have all the information needed. Let me calculate your tax liability under both Old and New regimes and recommend the best option for you.`, 'ai');
-          setCurrentStep('complete');
-          setTimeout(() => {
-            onCalculate();
-          }, 2000);
-        } else {
-          addMessage("Please enter a valid HRA amount (enter 0 if not applicable).", 'ai');
-        }
-        break;
-
-      case 'complete':
-        addMessage("I've already calculated your taxes! Please check the 'Tax Comparison' tab to see the detailed analysis and my recommendation.", 'ai');
-        break;
-
-      default:
-        addMessage("I didn't understand that. Could you please provide a valid number?", 'ai');
+    // Mock responses based on input
+    const lowerInput = input.toLowerCase();
+    
+    if (lowerInput.includes('tax') && lowerInput.includes('calculate')) {
+      return "I can help you calculate your taxes! Please provide:\n1. Your annual income\n2. Your age category\n3. Investment details for deductions\n\nYou can also use the Tax Calculator tab for detailed calculations.";
+    } else if (lowerInput.includes('itr') || lowerInput.includes('return')) {
+      return "For ITR filing, I can guide you through:\n• Choosing the right ITR form (1-7)\n• Understanding required documents\n• Pre-filling from Form 26AS/AIS\n• Common deductions and exemptions\n\nWhat specific aspect would you like help with?";
+    } else if (lowerInput.includes('deduction')) {
+      return "Here are key deductions for FY 2024-25:\n• Section 80C: ₹1.5 lakh (PPF, ELSS, LIC)\n• Section 80D: ₹25,000-50,000 (Health insurance)\n• Section 24: Home loan interest\n• HRA exemption\n\nWhich deduction would you like details about?";
+    } else if (lowerInput.includes('tds')) {
+      return "For TDS matters:\n• TDS rates vary by income type\n• Form 16/16A for TDS certificates\n• Quarterly TDS returns (24Q, 26Q, 27Q)\n• TRACES portal for e-filing\n\nWhat specific TDS query do you have?";
+    } else {
+      return "I'm here to help with all your tax-related questions! I can assist with:\n• Tax calculations and planning\n• ITR filing guidance\n• Deduction optimization\n• TDS/TCS queries\n• Compliance requirements\n\nPlease ask me anything specific about Indian taxation.";
     }
   };
 
@@ -212,63 +111,130 @@ export const AIChat: React.FC<AIChatProps> = ({
   };
 
   return (
-    <Card className="h-[600px] flex flex-col">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-blue-600" />
-          AI Tax Assistant
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="flex-1 flex flex-col">
-        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${
-                message.type === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              <div
-                className={`flex gap-3 max-w-[80%] ${
-                  message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.type === 'user' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {message.type === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                </div>
-                <div
-                  className={`rounded-lg px-4 py-2 ${
-                    message.type === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+    <div className="uniform-page-container">
+      <div className="uniform-content-wrapper">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="uniform-section-title">AI Tax Assistant</h1>
+            <p className="uniform-section-subtitle">Powered by Google Gemini - Your intelligent tax advisor</p>
+          </div>
         </div>
 
-        <div className="flex gap-2">
-          <Input
-            value={currentInput}
-            onChange={(e) => setCurrentInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your response..."
-            className="flex-1"
-          />
-          <Button onClick={handleSend} size="icon">
-            <Send className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        {!isConnected && (
+          <Card className="uniform-card mb-6">
+            <CardHeader className="uniform-card-header">
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-orange-500" />
+                Connect Gemini API
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="uniform-card-content">
+              <Alert className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  To use the AI assistant, please provide your Google Gemini API key. 
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">
+                    Get your API key here
+                  </a>
+                </AlertDescription>
+              </Alert>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label htmlFor="apiKey" className="uniform-input-label">Gemini API Key</Label>
+                  <Input
+                    id="apiKey"
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your Gemini API key..."
+                  />
+                </div>
+                <Button onClick={connectToGemini} disabled={!apiKey.trim()} className="mt-6">
+                  Connect
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="uniform-card">
+          <CardHeader className="uniform-card-header">
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="w-5 h-5 text-primary" />
+              Chat with AI Assistant
+              {isConnected && <Badge variant="secondary" className="ml-auto">Connected</Badge>}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="uniform-card-content">
+            <div className="h-[500px] flex flex-col">
+              <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 border rounded-lg bg-muted/20">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${
+                      message.type === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    <div
+                      className={`flex gap-3 max-w-[80%] ${
+                        message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        message.type === 'user' 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {message.type === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                      </div>
+                      <div
+                        className={`rounded-lg px-4 py-2 ${
+                          message.type === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-card text-card-foreground border'
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex gap-3 justify-start">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
+                      <Bot className="w-4 h-4" />
+                    </div>
+                    <div className="bg-card text-card-foreground border rounded-lg px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-primary border-t-transparent"></div>
+                        <span className="text-sm">Thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  value={currentInput}
+                  onChange={(e) => setCurrentInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder={isConnected ? "Ask me anything about taxes..." : "Connect API key first"}
+                  className="flex-1"
+                  disabled={!isConnected}
+                />
+                <Button onClick={handleSend} size="icon" disabled={!isConnected || !currentInput.trim()}>
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

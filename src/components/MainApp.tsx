@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 import { Navigation } from './Navigation';
 import { Dashboard } from './Dashboard';
 import { ClientManagement } from './ClientManagement';
-import { ComplianceCalendar } from './ComplianceCalendar';
-import { TaskManagement } from './TaskManagement';
 import { TaxCalculator } from './TaxCalculator';
 import { TaxLibrary } from './TaxLibrary';
 import { Settings } from './Settings';
 import { ITRFiling } from './ITRFiling';
 import { AuditReports } from './AuditReports';
 import { TDSReturns } from './TDSReturns';
+import { ReportGenerator } from './ReportGenerator';
+import { AIChat } from './AIChat';
 
 export const MainApp = () => {
   const [activeTab, setActiveTab] = useState('calculator');
@@ -29,20 +29,14 @@ export const MainApp = () => {
         return <AuditReports />;
       case 'tds-returns':
         return <TDSReturns />;
-      case 'compliance':
-        return <ComplianceCalendar />;
-      case 'tasks':
-        return <TaskManagement />;
+      case 'report-generator':
+        return <ReportGenerator />;
+      case 'chat':
+        return <AIChat />;
       case 'library':
         return <TaxLibrary />;
       case 'settings':
         return <Settings />;
-      case 'office-mgmt':
-        return <div className="p-6"><h1 className="text-2xl font-bold">Office Management - Coming Soon</h1></div>;
-      case 'user-mgmt':
-        return <div className="p-6"><h1 className="text-2xl font-bold">User Management - Coming Soon</h1></div>;
-      case 'chat':
-        return <div className="p-6"><h1 className="text-2xl font-bold">AI Assistant - Coming Soon</h1></div>;
       default:
         return <TaxCalculator />;
     }
