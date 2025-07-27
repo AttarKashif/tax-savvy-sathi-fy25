@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,15 +74,47 @@ export const ReportGenerator = () => {
     );
   };
 
-  const generateReport = () => {
-    console.log('Generating report:', {
-      type: selectedReportType,
-      dateRange,
-      clients: selectedClients,
-      title: reportTitle,
-      notes
-    });
-    // Implementation for actual report generation would go here
+  const generateReport = async () => {
+    try {
+      const reportData = {
+        type: selectedReportType,
+        dateRange,
+        clients: selectedClients,
+        title: reportTitle,
+        notes
+      };
+
+      console.log('Generating report with Google AI:', reportData);
+      
+      const { data } = await supabase.functions.invoke('google-api-helper', {
+        body: {
+          action: 'generate-report',
+          data: {
+            reportType: selectedReportType,
+            clientData: selectedClients,
+            period: `${dateRange.from} to ${dateRange.to}`,
+            customTitle: reportTitle,
+            additionalNotes: notes
+          }
+        }
+      });
+
+      if (data.success) {
+        // Create and download the generated report
+        const reportContent = data.data;
+        const blob = new Blob([reportContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${reportTitle || selectedReportType}_report.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error generating report:', error);
+    }
   };
 
   return (
