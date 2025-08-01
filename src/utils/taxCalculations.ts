@@ -1,4 +1,5 @@
-// Tax calculation utilities for FY 2024-25 (AY 2025-26)
+// Professional Tax calculation utilities for FY 2024-25 (AY 2025-26)
+// Enhanced with industry-standard features matching Computax/Winman
 
 export interface TaxSlabRate {
   min: number;
@@ -434,10 +435,29 @@ export function applyCarryForwardLosses(
 
 export function calculateSurcharge(income: number, tax: number): number {
   if (income <= 5000000) return 0;
-  if (income <= 10000000) return tax * 0.1;
-  if (income <= 20000000) return tax * 0.15;
-  if (income <= 50000000) return tax * 0.25;
-  return tax * 0.37;
+  
+  let surchargeRate = 0;
+  if (income <= 10000000) surchargeRate = 0.1;
+  else if (income <= 20000000) surchargeRate = 0.15;
+  else if (income <= 50000000) surchargeRate = 0.25;
+  else surchargeRate = 0.37;
+  
+  let surcharge = tax * surchargeRate;
+  
+  // Marginal relief: Total tax + surcharge should not exceed total income minus exempted amount
+  // plus amount of income-tax on exempted amount
+  if (income > 5000000 && income <= 10000000) {
+    const maxTaxWithSurcharge = (income - 5000000) + tax;
+    surcharge = Math.min(surcharge, maxTaxWithSurcharge - tax);
+  } else if (income > 10000000 && income <= 20000000) {
+    const maxTaxWithSurcharge = (income - 10000000) + (tax * 1.1);
+    surcharge = Math.min(surcharge, maxTaxWithSurcharge - tax);
+  } else if (income > 20000000 && income <= 50000000) {
+    const maxTaxWithSurcharge = (income - 20000000) + (tax * 1.15);
+    surcharge = Math.min(surcharge, maxTaxWithSurcharge - tax);
+  }
+  
+  return Math.max(0, surcharge);
 }
 
 export function calculateCess(taxPlusSurcharge: number): number {
