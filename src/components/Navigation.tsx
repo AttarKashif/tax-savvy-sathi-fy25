@@ -26,14 +26,9 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   const navigationItems = [
     { id: 'calculator', label: 'Tax Calculator', icon: Calculator },
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'clients', label: 'Clients', icon: Users },
     { id: 'itr-filing', label: 'ITR Filing', icon: FileSpreadsheet },
-    { id: 'audit-reports', label: 'Audit Reports', icon: Shield },
     { id: 'tds-returns', label: 'TDS Returns', icon: Receipt },
     { id: 'report-generator', label: 'Report Generator', icon: FileBarChart },
-    { id: 'chat', label: 'AI Assistant', icon: MessageSquare },
-    { id: 'library', label: 'Tax Library', icon: BookOpen },
   ];
 
   return (
@@ -75,15 +70,7 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       <div className="p-4 border-t border-border space-y-1 bg-muted/20">
         <Button
           variant="ghost"
-          className="w-full justify-start rounded-lg h-10 px-3 hover:bg-muted/50 text-muted-foreground hover:text-foreground"
-          onClick={() => onTabChange('settings')}
-        >
-          <Settings className="h-4 w-4 mr-3 flex-shrink-0" />
-          <span className="text-sm font-medium">Settings</span>
-        </Button>
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg h-10 px-3"
+          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg h-10 px-3"
           onClick={signOut}
         >
           <LogOut className="h-4 w-4 mr-3 flex-shrink-0" />
