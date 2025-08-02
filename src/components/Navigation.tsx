@@ -3,18 +3,13 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { 
   Calculator,
-  LayoutDashboard, 
-  Users, 
-  MessageSquare,
-  BookOpen,
-  Settings,
   LogOut,
   FileSpreadsheet,
   Receipt,
-  Shield,
   FileBarChart
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NavigationProps {
   activeTab: string;
@@ -67,10 +62,14 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-border space-y-1 bg-muted/20">
+      <div className="p-4 border-t border-border space-y-2 bg-muted/20">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-muted-foreground font-medium">Theme</span>
+          <ThemeToggle />
+        </div>
         <Button
           variant="ghost"
-          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg h-10 px-3"
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg h-10 px-3"
           onClick={signOut}
         >
           <LogOut className="h-4 w-4 mr-3 flex-shrink-0" />

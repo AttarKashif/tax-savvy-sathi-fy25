@@ -140,75 +140,95 @@ export const TaxCalculator = () => {
     <div className="uniform-page-container">
       <div className="uniform-content-wrapper">
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Calculator className="w-6 h-6 text-primary" />
-            <h1 className="uniform-section-title">Tax Calculator</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Calculator className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Tax Calculator</h1>
+                <p className="text-sm text-muted-foreground">FY 2024-25 with AI-powered insights</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="keyboard-shortcut">Ctrl+Enter</span>
+              <span>to calculate</span>
+            </div>
           </div>
-          <p className="uniform-section-subtitle">Calculate income tax for FY 2024-25 with AI-powered insights</p>
         </div>
 
         {/* Smart Alerts */}
-        {anomalies.length > 0 && (
-          <Alert className="mb-6 uniform-alert-warning">
-            <AlertDescription>
-              <div className="space-y-1">
-                {anomalies.map((anomaly, index) => (
-                  <div key={index}>⚠️ {anomaly}</div>
-                ))}
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
+        {(anomalies.length > 0 || suggestions.length > 0) && (
+          <div className="mb-6 space-y-3">
+            {anomalies.length > 0 && (
+              <Alert className="uniform-alert-warning border-l-4 border-l-yellow-500">
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <div className="font-medium flex items-center gap-2">
+                      ⚠️ Potential Issues Detected
+                    </div>
+                    {anomalies.map((anomaly, index) => (
+                      <div key={index} className="text-sm pl-6">• {anomaly}</div>
+                    ))}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
 
-        {suggestions.length > 0 && (
-          <Alert className="mb-6 uniform-alert-info">
-            <AlertDescription>
-              <div className="space-y-1">
-                {suggestions.map((suggestion, index) => (
-                  <div key={index}>💡 {suggestion}</div>
-                ))}
-              </div>
-            </AlertDescription>
-          </Alert>
+            {suggestions.length > 0 && (
+              <Alert className="uniform-alert-info border-l-4 border-l-blue-500">
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <div className="font-medium flex items-center gap-2">
+                      💡 Smart Recommendations
+                    </div>
+                    {suggestions.map((suggestion, index) => (
+                      <div key={index} className="text-sm pl-6">• {suggestion}</div>
+                    ))}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-9 mb-8 bg-muted p-1">
-            <TabsTrigger value="income" className="flex items-center gap-2">
-              <Calculator className="w-4 h-4" />
-              Income
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9 mb-8 bg-muted/50 p-1 h-auto">
+            <TabsTrigger value="income" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <Calculator className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Income</span>
             </TabsTrigger>
-            <TabsTrigger value="house-property" className="flex items-center gap-2">
-              <Home className="w-4 h-4" />
-              Property
+            <TabsTrigger value="house-property" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <Home className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Property</span>
             </TabsTrigger>
-            <TabsTrigger value="capital-gains" className="flex items-center gap-2">
-              <Calculator className="w-4 h-4" />
-              Capital Gains
+            <TabsTrigger value="capital-gains" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <Calculator className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Capital</span>
             </TabsTrigger>
-            <TabsTrigger value="deductions" className="flex items-center gap-2">
-              <Calculator className="w-4 h-4" />
-              Deductions
+            <TabsTrigger value="deductions" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <Calculator className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Deductions</span>
             </TabsTrigger>
-            <TabsTrigger value="tds-tcs" className="flex items-center gap-2">
-              <Receipt className="w-4 h-4" />
-              TDS/TCS
+            <TabsTrigger value="tds-tcs" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <Receipt className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">TDS/TCS</span>
             </TabsTrigger>
-            <TabsTrigger value="losses" className="flex items-center gap-2">
-              <TrendingDown className="w-4 h-4" />
-              Losses
+            <TabsTrigger value="losses" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <TrendingDown className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Losses</span>
             </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <Lightbulb className="w-4 h-4" />
-              Insights
+            <TabsTrigger value="insights" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <Lightbulb className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Insights</span>
             </TabsTrigger>
-            <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-2">
-              <ChartBar className="w-4 h-4" />
-              Results
+            <TabsTrigger value="results" disabled={!hasValidIncome} className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm disabled:opacity-50">
+              <ChartBar className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Results</span>
             </TabsTrigger>
-            <TabsTrigger value="help" className="flex items-center gap-2">
-              <HelpCircle className="w-4 h-4" />
-              Help
+            <TabsTrigger value="help" className="flex items-center gap-1 px-2 py-2 text-xs lg:text-sm">
+              <HelpCircle className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Help</span>
             </TabsTrigger>
           </TabsList>
 

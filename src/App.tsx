@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { MainApp } from "@/components/MainApp";
 import { AuthPage } from "@/components/AuthPage";
 import { AccessPending } from "@/components/AccessPending";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const queryClient = new QueryClient();
 
@@ -34,11 +35,13 @@ const AppContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AppContent />
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
